@@ -1,0 +1,20 @@
+[GLOBAL]
+pants_version = "2.25.0"
+backend_packages = [
+  "pants.backend.python",
+  "pants.backend.python.lint.flake8",
+  "pants.backend.python.typecheck.mypy",
+  "pants.backend.experimental.javascript",
+]
+
+[source]
+root_patterns = [
+  "/pokedex-service/src",
+  "/pokedex-ui",
+]
+
+[nodejs]
+known_versions = [] # Assign this to the empty list to ensure Pants never downloads.
+version = "v22.15.0"
+search_path = ["/Users/mariodias/.nvm/versions/node/v22.15.0/bin/node"]
+package_manager = "pnpm"
