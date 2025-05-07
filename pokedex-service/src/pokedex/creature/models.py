@@ -2,6 +2,8 @@ from typing import Optional
 
 from sqlmodel import SQLModel, Field
 
+from pokedex.creature.enums import BodyShapeIcon
+
 
 class CreatureBase(SQLModel):
     """
@@ -18,7 +20,7 @@ class CreatureBase(SQLModel):
     family: str
     height: float
     weight: float
-    shape: str
+    body_shape: BodyShapeIcon
     image_path: str
 
 
@@ -61,5 +63,5 @@ class CreatureUpdate(CreatureBase):
     family: str | None = None
     height: float | None = None
     weight: float | None = None
-    shape: str | None = None
+    body_shape: BodyShapeIcon | None = None
     image_path: str | None = None

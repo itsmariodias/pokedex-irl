@@ -1,12 +1,15 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, UploadFile
 
 from pokedex.config import Settings, get_settings
-from pokedex.creature.models import CreatureCreate, CreaturePublic
+from pokedex.creature.dependencies import validate_image
+from pokedex.creature.models import BodyShapeIcon, CreatureCreate, CreaturePublic
 from pokedex.creature.service import create_creature
+from pokedex.creature.enums import BodyShapeIcon
 from pokedex.creature.utils import upload_file
 from pokedex.database import DbSession
-from pokedex.creature.dependencies import validate_image
-from typing import Annotated
+
 
 router = APIRouter(prefix="/creature", tags=["creature-identification"])
 
@@ -54,7 +57,7 @@ async def identify_creature(
         family="Macropodidae",
         height=1.5,
         weight=85.0,
-        shape="Quadruped",
+        body_shape=BodyShapeIcon.BIPEDAL_TAIL,
         image_path=file_path,
     )
 
