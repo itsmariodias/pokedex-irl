@@ -1,5 +1,5 @@
 from loguru import logger
-from fastapi import HTTPException, UploadFile, status
+from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from .models import Creature, CreatureCreate, CreatureUpdate
@@ -17,9 +17,6 @@ def create(db_session: Session, creature: CreatureCreate) -> Creature:
 
     Returns:
         Creature: The created creature
-
-    Raises:
-        HTTPException: If creature with same name already exists
     """
     db_creature = Creature.model_validate(creature)
     db_session.add(db_creature)
@@ -28,12 +25,9 @@ def create(db_session: Session, creature: CreatureCreate) -> Creature:
         db_session.refresh(db_creature)
         return db_creature
     except Exception:
-        logger.error("Creature with this name already exists")
+        logger.error("Failed to create creature")
         db_session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Creature with this name already exists",
-        )
+        raise
 
 
 def get(db_session: Session, creature_id: int) -> Creature:
@@ -46,16 +40,11 @@ def get(db_session: Session, creature_id: int) -> Creature:
 
     Returns:
         Creature: The requested creature
-
-    Raises:
-        HTTPException: If creature is not found
     """
     creature = db_session.get(Creature, creature_id)
     if not creature:
         logger.error(f"Creature with ID {creature_id} not found")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Creature not found"
-        )
+        raise
     return creature
 
 
@@ -89,9 +78,6 @@ def update(
 
     Returns:
         Creature: The updated creature
-
-    Raises:
-        HTTPException: If creature is not found
     """
     creature = get(db_session, creature_id)
     for key, value in creature_data.dict(exclude_unset=True).items():
@@ -109,9 +95,6 @@ def delete(db: Session, creature_id: int) -> None:
     Args:
         db_session (Session): Database session
         creature_id (int): The ID of the creature to delete
-
-    Raises:
-        HTTPException: If creature is not found
     """
     creature = get(db, creature_id)
     db.delete(creature)
