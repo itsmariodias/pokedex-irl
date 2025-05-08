@@ -42,9 +42,6 @@ def get(db_session: Session, creature_id: int) -> Creature:
         Creature: The requested creature
     """
     creature = db_session.get(Creature, creature_id)
-    if not creature:
-        logger.error(f"Creature with ID {creature_id} not found")
-        raise
     return creature
 
 
