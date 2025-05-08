@@ -15,8 +15,10 @@ logger.info("Starting Pokedex Service...")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup events
+    from pokedex.database import engine
+
     logger.info("Creating database and tables...")
-    create_db_and_tables()
+    create_db_and_tables(engine)
     yield
     # Shutdown events
     logger.info("Shutting down Pokedex Service...")

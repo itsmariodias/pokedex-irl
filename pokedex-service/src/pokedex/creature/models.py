@@ -2,7 +2,7 @@ from typing import Optional
 
 from sqlmodel import SQLModel, Field
 
-from pokedex.creature.enums import BodyShapeIcon
+from .enums import BodyShapeIcon
 
 
 class CreatureBase(SQLModel):

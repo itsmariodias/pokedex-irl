@@ -18,7 +18,7 @@ def create_db_engine(settings: Settings) -> Engine:
 engine = create_db_engine(get_settings())
 
 
-def create_db_and_tables():
+def create_db_and_tables(engine: Engine):
     SQLModel.metadata.create_all(engine)
 
 
