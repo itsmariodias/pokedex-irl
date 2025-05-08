@@ -80,7 +80,7 @@ def update(
         Creature: The updated creature
     """
     creature = get(db_session, creature_id)
-    for key, value in creature_data.dict(exclude_unset=True).items():
+    for key, value in creature_data.model_dump(exclude_unset=True).items():
         setattr(creature, key, value)
 
     db_session.commit()
@@ -88,7 +88,7 @@ def update(
     return creature
 
 
-def delete(db: Session, creature_id: int) -> None:
+def delete(db_session: Session, creature_id: int) -> None:
     """
     Delete a creature by ID.
 
@@ -96,9 +96,9 @@ def delete(db: Session, creature_id: int) -> None:
         db_session (Session): Database session
         creature_id (int): The ID of the creature to delete
     """
-    creature = get(db, creature_id)
-    db.delete(creature)
-    db.commit()
+    creature = get(db_session, creature_id)
+    db_session.delete(creature)
+    db_session.commit()
 
 
 def get_by_name(db_session: Session, name: str) -> Creature | None:
