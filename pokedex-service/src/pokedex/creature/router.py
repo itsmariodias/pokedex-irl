@@ -7,7 +7,7 @@ from pokedex.database import DbSession
 
 from .dependencies import validate_image
 from .models import CreaturePublic
-from .service import identify_from_image, get
+from .service import identify_from_image, get, get_all
 
 router = APIRouter(prefix="/creature", tags=["creature-identification"])
 
@@ -46,6 +46,27 @@ async def get_creature(
             detail="Creature not found",
         )
     return creature
+
+
+@router.get(
+    "/",
+    response_model=list[CreaturePublic],
+)
+async def get_all_creatures(
+    db_session: DbSession,
+):
+    """
+    Endpoint to get all creatures.
+
+    Args:
+        db_session: Database session
+
+    Returns:
+        List of creatures
+    """
+
+    creatures = get_all(db_session)
+    return creatures
 
 
 @router.post(

@@ -45,6 +45,19 @@ def get(db_session: Session, creature_id: int) -> Creature:
     return creature
 
 
+def get_all(db_session: Session) -> list[Creature]:
+    """
+    Get all creatures.
+
+    Args:
+        db_session (Session): Database session
+
+    Returns:
+        list[Creature]: List of all creatures
+    """
+    return db_session.query(Creature).all()
+
+
 def get_all_with_pagination(
     db_session: Session, skip: int = 0, limit: int = 100
 ) -> list[Creature]:
@@ -129,8 +142,7 @@ async def identify_from_image(
         Creature: The created or existing creature
     """
 
-    # Save the file to the static directory
-    file_path = await upload_file(image, upload_dir)
+    # TODO - Implement actual image recognition logic to identify the creature
 
     # Create a new Creature object
     creature = CreatureCreate(
@@ -145,7 +157,6 @@ async def identify_from_image(
         height=1.5,
         weight=85.0,
         body_shape=BodyShapeIcon.BIPEDAL_TAIL,
-        image_path=file_path,
     )
 
     # Check if the creature already exists
@@ -157,6 +168,12 @@ async def identify_from_image(
             f"Creature with name {creature.name} already exists. Returning existing creature."
         )
         return existing_creature
+    
+    logger.info(f"Adding new creature {creature.name} to the database.")
+
+    # Save the image to the static directory
+    file_path = await upload_file(image, upload_dir)
+    creature.image_path = file_path
 
     # If it doesn't exist, create a new one and return it
     return create(db_session, creature)
