@@ -43,13 +43,15 @@ async def test_validate_image_invalid_file(mock_invalid_file):
 
 
 @pytest.mark.asyncio
-async def test_validate_image_different_image_types(mocker):
+async def test_validate_image_different_image_types():
     """Test validate_image with different valid image types."""
     image_types = ["image/jpeg", "image/png", "image/gif", "image/webp"]
 
     for image_type in image_types:
         mock_image = UploadFile(
-            filename=f"test.{image_type.split('/')[-1]}", content_type=image_type
+            filename=f"test.{image_type.split('/')[-1]}",
+            file=b"test_image_data",
+            headers={"content-type": image_type},
         )
         result = await validate_image(mock_image)
         assert result == mock_image
