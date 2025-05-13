@@ -144,6 +144,9 @@ async def identify_from_image(
 
     # TODO - Implement actual image recognition logic to identify the creature
 
+    # Save the image to the static directory
+    file_path = await upload_file(image, upload_dir)
+
     # Create a new Creature object
     creature = CreatureCreate(
         name="Red Kangaroo",
@@ -157,6 +160,7 @@ async def identify_from_image(
         height=1.5,
         weight=85.0,
         body_shape=BodyShapeIcon.BIPEDAL_TAIL,
+        image_path=file_path,
     )
 
     # Check if the creature already exists
@@ -168,12 +172,8 @@ async def identify_from_image(
             f"Creature with name {creature.name} already exists. Returning existing creature."
         )
         return existing_creature
-    
-    logger.info(f"Adding new creature {creature.name} to the database.")
 
-    # Save the image to the static directory
-    file_path = await upload_file(image, upload_dir)
-    creature.image_path = file_path
+    logger.info(f"Adding new creature {creature.name} to the database.")
 
     # If it doesn't exist, create a new one and return it
     return create(db_session, creature)

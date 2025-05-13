@@ -29,7 +29,9 @@ app = FastAPI(
     description=settings.project_description,
     root_path=settings.api_v1_prefix,
     openapi_url="/docs/openapi.json",
+    docs_url="/docs",
+    redoc_url=None,
     lifespan=lifespan,
 )
 
-app.include_router(creature_router, prefix=settings.api_v1_prefix)
+app.include_router(creature_router)

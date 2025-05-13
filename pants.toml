@@ -8,13 +8,24 @@ backend_packages = [
 ]
 
 [source]
-root_patterns = [
-  "/pokedex-service/src",
-  "/pokedex-ui",
-]
+root_patterns = ["/pokedex-service/src", "/pokedex-ui"]
 
 [nodejs]
-known_versions = [] # Assign this to the empty list to ensure Pants never downloads.
+known_versions = []
 version = "v22.15.0"
-search_path = ["/Users/mariodias/.nvm/versions/node/v22.15.0/bin/node"]
+search_path = ["/Users/mariodias/.nvm/versions/node/v22.15.0/bin/node"] #TODO remove hardcoding here
 package_manager = "pnpm"
+
+[python]
+interpreter_constraints = ['==3.12.*']
+
+[test]
+output = "all"
+report = true
+
+[pytest]
+args = [
+  "--html=/Users/mariodias/Projects/pokedex-irl/dist/test/reports/report.html", #TODO remove hardcoded path
+  "--self-contained-html",
+  "-v",
+]

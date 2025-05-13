@@ -3,3 +3,5 @@
 /dist/
 .DS_Store
 /static/
+/.vscode/
+.pytest_cache/
