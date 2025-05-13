@@ -2,7 +2,8 @@
 pants_version = "2.25.0"
 backend_packages = [
   "pants.backend.python",
-  "pants.backend.python.lint.flake8",
+  "pants.backend.experimental.python.lint.ruff.check",
+  "pants.backend.experimental.python.lint.ruff.format",
   "pants.backend.python.typecheck.mypy",
   "pants.backend.experimental.javascript",
 ]
@@ -18,12 +19,18 @@ package_manager = "pnpm"
 
 [python]
 interpreter_constraints = ['==3.12.*']
+enable_resolves = true
+default_resolve = "requirements-lock"
+
+[python.resolves]
+requirements-lock = "pokedex-service/requirements.lock"
 
 [test]
 output = "all"
 report = true
 
 [pytest]
+install_from_resolve = "requirements-lock"
 args = [
   "--html=/Users/mariodias/Projects/pokedex-irl/dist/test/reports/report.html", #TODO remove hardcoded path
   "--self-contained-html",
