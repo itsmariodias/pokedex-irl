@@ -1,10 +1,11 @@
 from loguru import logger
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
+from langchain_core.runnables import RunnableConfig
 from sqlalchemy.orm import Session
 
-from .models import Creature, CreatureCreate, CreatureUpdate
-from .utils import upload_file
-from .enums import BodyShapeIcon
+from pokedex.creature.models import Creature, CreatureCreate, CreatureUpdate
+from pokedex.creature.utils import upload_file
+from pokedex.agent.agents import get_agent
 
 
 def create(db_session: Session, creature: CreatureCreate) -> Creature:
@@ -129,6 +130,7 @@ async def identify_from_image(
     db_session: Session,
     image: UploadFile,
     upload_dir: str,
+    config: RunnableConfig,
 ) -> Creature:
     """
     Identify a creature from an image and add it to the database if it doesn't exist.
@@ -142,38 +144,57 @@ async def identify_from_image(
         Creature: The created or existing creature
     """
 
-    # TODO - Implement actual image recognition logic to identify the creature
+    # Scan the image using the scanner agent
+    scanner_agent = get_agent("scanner-agent")
 
-    # Save the image to the static directory
-    file_path = await upload_file(image, upload_dir)
+    image_buffer = await image.read()
 
-    # Create a new Creature object
-    creature = CreatureCreate(
-        name="Red Kangaroo",
-        scientific_name="Macropus rufus",
-        description="The red kangaroo is the largest of all kangaroos and is native to Australia.",
-        type="Normal/Fighting",
-        gender_ratio=0.5,
-        kingdom="Animalia",
-        classification="Mammal",
-        family="Macropodidae",
-        height=1.5,
-        weight=85.0,
-        body_shape=BodyShapeIcon.BIPEDAL_TAIL,
-        image_path=file_path,
-    )
+    # scanner_agent.ainvoke returns a dict, not a ScannerState instance
+    scanner_result = await scanner_agent.ainvoke({"image": image_buffer}, config)
+    creature_name = scanner_result["creature_name"]
+
+    if creature_name is None:
+        raise HTTPException(
+            status_code=400,
+            detail="No creature found in the image. Please try again with a different image.",
+        )
 
     # Check if the creature already exists
-    existing_creature = get_by_name(db_session, creature.name)
+    existing_creature = get_by_name(db_session, creature_name)
 
     if existing_creature:
         # If it exists, return the existing creature
         logger.info(
-            f"Creature with name {creature.name} already exists. Returning existing creature."
+            f"Creature with name {creature_name} already exists. Returning existing creature."
         )
         return existing_creature
 
-    logger.info(f"Adding new creature {creature.name} to the database.")
+    # Save the image to the static directory
+    await image.seek(0)
+    file_path = await upload_file(image, upload_dir)
+
+    explainer_agent = get_agent("explainer-agent")
+
+    # Get the creature details from the explainer agent
+    creature_details = await explainer_agent.ainvoke({"creature_name": creature_name}, config)
+
+    # Create a new Creature object
+    creature = CreatureCreate(
+        name=creature_details["creature_name"],
+        scientific_name=creature_details["creature"].scientific_name,
+        description=creature_details["creature"].description,
+        type=creature_details["creature"].type,
+        gender_ratio=creature_details["creature"].gender_ratio,
+        kingdom=creature_details["creature"].kingdom,
+        classification=creature_details["creature"].classification,
+        family=creature_details["creature"].family,
+        height=creature_details["creature"].height,
+        weight=creature_details["creature"].weight,
+        body_shape=creature_details["creature"].body_shape,
+        image_path=file_path,
+    )
+
+    logger.info(f"Adding new creature to the database: {creature.model_dump()}")
 
     # If it doesn't exist, create a new one and return it
     return create(db_session, creature)

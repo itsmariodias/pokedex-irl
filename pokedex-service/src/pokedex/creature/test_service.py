@@ -1,10 +1,12 @@
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
+
 import pytest
 from fastapi import UploadFile
-from .models import Creature, CreatureCreate, CreatureUpdate
-from .enums import BodyShapeIcon
 
-from .service import (
+from pokedex.creature.models import Creature, CreatureCreate, CreatureUpdate
+from pokedex.creature.enums import BodyShapeIcon
+from pokedex.agent.explainer.schema import CreatureExplanation
+from pokedex.creature.service import (
     create,
     get,
     get_all,
@@ -159,12 +161,25 @@ async def test_identify_from_image_existing(mocker, mock_db_session, mock_creatu
         mock_creature
     )
 
-    mock_upload = mocker.patch(
-        "pokedex.creature.service.upload_file", new_callable=AsyncMock
+    mock_scanner_agent = Mock()
+    mock_scanner_agent.ainvoke = AsyncMock(
+        return_value={"image": b"fake", "creature_name": mock_creature.name}
     )
-    mock_upload.return_value = "new/image/path.jpg"
 
-    result = await identify_from_image(mock_db_session, mock_image, "upload_dir")
+    mock_explainer_agent = Mock()
+    mock_explainer_agent.ainvoke = AsyncMock()
+
+    def agent_side_effect(name):
+        if name == "scanner-agent":
+            return mock_scanner_agent
+        elif name == "explainer-agent":
+            return mock_explainer_agent
+        else:
+            raise ValueError("Unknown agent")
+
+    mocker.patch("pokedex.creature.service.get_agent", side_effect=agent_side_effect)
+
+    result = await identify_from_image(mock_db_session, mock_image, "upload_dir", config={})
 
     assert result == mock_creature
 
@@ -180,7 +195,45 @@ async def test_identify_from_image_new(mocker, mock_db_session):
     )
     mock_upload.return_value = "new/image/path.jpg"
 
-    result = await identify_from_image(mock_db_session, mock_image, "upload_dir")
+    # Mock the scanner agent to return a valid dict
+    mock_scanner_agent = Mock()
+    mock_scanner_agent.ainvoke = AsyncMock(
+        return_value={"image": b"fake", "creature_name": "New Creature"}
+    )
+
+    # Mock the explainer agent to return a valid dict with a CreatureExplanation object
+    mock_creature_explanation = CreatureExplanation(
+        scientific_name="Panthera leo",
+        description="A large wild cat species found in Africa and India.",
+        type="Normal",
+        gender_ratio=0.5,
+        kingdom="Animalia",
+        classification="Mammal",
+        family="Felidae",
+        height=1.2,
+        weight=190.0,
+        body_shape=BodyShapeIcon.QUADRUPED,
+    )
+
+    mock_explainer_agent = Mock()
+    mock_explainer_agent.ainvoke = AsyncMock(
+        return_value={
+            "creature_name": "New Creature",
+            "creature": mock_creature_explanation,
+        }
+    )
+
+    def agent_side_effect(name):
+        if name == "scanner-agent":
+            return mock_scanner_agent
+        elif name == "explainer-agent":
+            return mock_explainer_agent
+        else:
+            raise ValueError("Unknown agent")
+
+    mocker.patch("pokedex.creature.service.get_agent", side_effect=agent_side_effect)
+
+    result = await identify_from_image(mock_db_session, mock_image, "upload_dir", config={})
 
     assert isinstance(result, Creature)
     mock_db_session.add.assert_called_once()

@@ -1,8 +1,8 @@
 from fastapi import HTTPException
 import pytest
 
-from .models import Creature
-from .enums import BodyShapeIcon
+from pokedex.creature.models import Creature
+from pokedex.creature.enums import BodyShapeIcon
 
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 from fastapi import UploadFile, HTTPException
 import pytest
-from .dependencies import validate_image
+
+from pokedex.creature.dependencies import validate_image
 
 
 @pytest.fixture

@@ -1,0 +1,50 @@
+[project]
+name = "pokedex-service"
+version = "0.1.0"
+description = "A FastAPI-based Pokedex service that identifies real-world creatures and generates Pokédex-style entries."
+authors = [
+    { name = "Mario Dias" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi==0.115.12",
+    "uvicorn==0.34.2",
+    "sqlmodel==0.0.24",
+    "SQLAlchemy==2.0.40",
+    "pydantic==2.11.4",
+    "loguru==0.7.3",
+    "langgraph==0.4.3"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==8.3.5",
+    "pytest-asyncio==0.26.0",
+    "pytest-html==4.1.1",
+    "pytest-metadata==3.1.1",
+    "pytest-mock==3.14.0"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra --color=yes"
+testpaths = [
+    "src/pokedex/creature",
+    "src/pokedex/agent",
+    "tests"
+]
+python_files = [
+    "test_*.py",
+    "*_test.py"
+]

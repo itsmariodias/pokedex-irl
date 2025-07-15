@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from pokedex.config import Settings, get_settings
 from pokedex.database import DbSession
-
-from .dependencies import validate_image
-from .models import CreaturePublic
-from .service import identify_from_image, get, get_all
+from pokedex.creature.dependencies import validate_image
+from pokedex.creature.models import CreaturePublic
+from pokedex.creature.service import identify_from_image, get, get_all
+from pokedex.llm import get_llm
 
 router = APIRouter(prefix="/creature", tags=["creature-identification"])
 
@@ -98,5 +98,7 @@ async def identify_creature(
         Details of the identified creature
     """
 
-    creature = await identify_from_image(db_session, image, settings.upload_dir)
+    config = {"configurable": {"llm": get_llm(settings.default_model)}}
+
+    creature = await identify_from_image(db_session, image, settings.upload_dir, config)
     return creature

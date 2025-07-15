@@ -1,9 +1,10 @@
 from io import BytesIO
 from unittest.mock import patch
+
 from fastapi import UploadFile
 import pytest
 
-from .utils import upload_file
+from pokedex.creature.utils import upload_file
 
 
 @pytest.fixture

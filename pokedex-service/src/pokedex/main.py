@@ -3,11 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 
-from pokedex.config import get_settings
+from pokedex.config import settings
 from pokedex.database import create_db_and_tables
 from pokedex.creature.router import router as creature_router
-
-settings = get_settings()
+from pokedex.llm import get_llm
 
 logger.info("Starting Pokedex Service...")
 
@@ -34,4 +33,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+get_llm(settings.default_model)
+
 app.include_router(creature_router)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    logger.info("Running Pokedex Service with Uvicorn...")
+    uvicorn.run(
+        "pokedex.main:app",
+        host="0.0.0.0",
+        port=settings.port,
+    )
