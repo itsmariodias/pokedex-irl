@@ -12,7 +12,7 @@ async def explain_creature(
     structured_llm = llm.with_structured_output(CreatureExplanation)
 
     prompt = f"""You are an expert zoologist and Pokemon enthusiast. Provide a detailed explanation of the creature named '{state.creature_name}'.
-Include its scientific name, description, pokemon type, gender ratio, kingdom, classification, family, height, weight, and body shape.
+Include its scientific name, description, gender ratio, kingdom, classification, family, height, weight, and body shape.
 Provide the explanation as accurate as possible based on the constraints specified.
 """
 

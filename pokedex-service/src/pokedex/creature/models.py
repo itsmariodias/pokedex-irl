@@ -13,7 +13,6 @@ class CreatureBase(SQLModel):
     name: str = Field(unique=True, index=True)
     scientific_name: str = Field(unique=True)
     description: str
-    type: str
     gender_ratio: float
     kingdom: str
     classification: str
@@ -56,7 +55,6 @@ class CreatureUpdate(CreatureBase):
     name: str | None = None
     scientific_name: str | None = None
     description: str | None = None
-    type: str | None = None
     gender_ratio: float | None = None
     kingdom: str | None = None
     classification: str | None = None

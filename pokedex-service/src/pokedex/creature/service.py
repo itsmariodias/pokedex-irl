@@ -186,7 +186,6 @@ async def identify_from_image(
         name=creature_name,
         scientific_name=creature_details.scientific_name,
         description=creature_details.description,
-        type=creature_details.pokemon_type,
         gender_ratio=creature_details.gender_ratio,
         kingdom=creature_details.kingdom,
         classification=creature_details.classification,

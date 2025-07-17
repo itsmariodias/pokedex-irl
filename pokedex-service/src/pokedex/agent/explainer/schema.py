@@ -10,9 +10,6 @@ class CreatureExplanation(BaseModel):
     description: str = Field(
         description="A brief description of the creature, including its habitat, behavior, and notable features in 50 words or less."
     )
-    pokemon_type: str = Field(
-        description="The Pokemon typing of the creature if it were in Pokemon, for example, 'Fire', 'Water', 'Grass', 'Normal', 'Fire/Flying', etc."
-    )
     gender_ratio: float = Field(
         description="The ratio of males to females in the species, e.g., 1.0 for a 1:1 ratio."
     )

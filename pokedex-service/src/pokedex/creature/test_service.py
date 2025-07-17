@@ -25,7 +25,6 @@ def mock_creature():
         name="African Lion",
         scientific_name="Panthera leo",
         description="A large wild cat species found in Africa and India.",
-        type="Normal",
         gender_ratio=0.5,
         kingdom="Animalia",
         classification="Mammal",
@@ -43,7 +42,6 @@ def mock_creature_create():
         name="African Lion",
         scientific_name="Panthera leo",
         description="A large wild cat species found in Africa and India.",
-        type="Normal",
         gender_ratio=0.5,
         kingdom="Animalia",
         classification="Mammal",
@@ -205,7 +203,6 @@ async def test_identify_from_image_new(mocker, mock_db_session):
     mock_creature_explanation = CreatureExplanation(
         scientific_name="Panthera leo",
         description="A large wild cat species found in Africa and India.",
-        pokemon_type="Normal",
         gender_ratio=0.5,
         kingdom="Animalia",
         classification="Mammal",
