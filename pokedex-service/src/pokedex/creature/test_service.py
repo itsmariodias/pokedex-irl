@@ -205,7 +205,7 @@ async def test_identify_from_image_new(mocker, mock_db_session):
     mock_creature_explanation = CreatureExplanation(
         scientific_name="Panthera leo",
         description="A large wild cat species found in Africa and India.",
-        type="Normal",
+        pokemon_type="Normal",
         gender_ratio=0.5,
         kingdom="Animalia",
         classification="Mammal",

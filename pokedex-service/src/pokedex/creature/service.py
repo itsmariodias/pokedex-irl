@@ -1,6 +1,7 @@
 from loguru import logger
 from fastapi import HTTPException, UploadFile
 from langchain_core.runnables import RunnableConfig
+from pokedex.agent.explainer.schema import CreatureExplanation
 from sqlalchemy.orm import Session
 
 from pokedex.creature.models import Creature, CreatureCreate, CreatureUpdate
@@ -178,19 +179,21 @@ async def identify_from_image(
     # Get the creature details from the explainer agent
     creature_details = await explainer_agent.ainvoke({"creature_name": creature_name}, config)
 
+    creature_details: CreatureExplanation = creature_details["creature"]
+
     # Create a new Creature object
     creature = CreatureCreate(
-        name=creature_details["creature_name"],
-        scientific_name=creature_details["creature"].scientific_name,
-        description=creature_details["creature"].description,
-        type=creature_details["creature"].type,
-        gender_ratio=creature_details["creature"].gender_ratio,
-        kingdom=creature_details["creature"].kingdom,
-        classification=creature_details["creature"].classification,
-        family=creature_details["creature"].family,
-        height=creature_details["creature"].height,
-        weight=creature_details["creature"].weight,
-        body_shape=creature_details["creature"].body_shape,
+        name=creature_name,
+        scientific_name=creature_details.scientific_name,
+        description=creature_details.description,
+        type=creature_details.pokemon_type,
+        gender_ratio=creature_details.gender_ratio,
+        kingdom=creature_details.kingdom,
+        classification=creature_details.classification,
+        family=creature_details.family,
+        height=creature_details.height,
+        weight=creature_details.weight,
+        body_shape=creature_details.body_shape,
         image_path=file_path,
     )
 

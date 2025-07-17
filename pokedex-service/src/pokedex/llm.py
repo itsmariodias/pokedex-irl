@@ -11,7 +11,8 @@ from pokedex.config import settings
 class ModelName(Enum):
     GPT_4O = "gpt-4o"
     GPT_4O_MINI = "gpt-4o-mini"
-    LLAMA_CPP = "llama-cpp"
+    QWEN_3_LOCAL = "qwen-3-local"
+    GEMMA_3_LOCAL = "gemma-3-local"
 
 
 @cache
@@ -31,12 +32,21 @@ def get_llm(model_name: str) -> BaseChatModel:
             pass
         case ModelName.GPT_4O_MINI:
             pass
-        case ModelName.LLAMA_CPP:
+        case ModelName.QWEN_3_LOCAL:
             llm = ChatOpenAI(
                 name=settings.model_name,
                 model="gpt-4o-mini",
                 api_key=SecretStr(settings.model_api_key),
                 base_url=settings.model_endpoint,
+                temperature=0.0,
+                max_tokens=512,
+            )
+        case ModelName.GEMMA_3_LOCAL:
+            llm = ChatOpenAI(
+                name=settings.image_model_name,
+                model="gpt-4o-mini",
+                api_key=SecretStr(settings.image_model_api_key),
+                base_url=settings.image_model_endpoint,
                 temperature=0.0,
                 max_tokens=512,
             )

@@ -21,10 +21,13 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{os.path.abspath(os.path.join(os.path.dirname(__file__), '../../pokedex.db'))}"
     static_dir: str = "/static"
     upload_dir: str = "/uploads"
-    default_model: str = "llama-cpp"
+    default_model: str = "qwen-3-local"
     model_name: str
     model_api_key: str
     model_endpoint: str
+    image_model_name: str
+    image_model_endpoint: str
+    image_model_api_key: str
 
 
 @lru_cache

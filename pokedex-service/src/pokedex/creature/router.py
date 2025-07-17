@@ -98,7 +98,12 @@ async def identify_creature(
         Details of the identified creature
     """
 
-    config = {"configurable": {"llm": get_llm(settings.default_model)}}
+    config = {
+        "configurable": {
+            "llm": get_llm(settings.default_model),
+            "image_llm": get_llm("gemma-3-local"),
+        }
+    }
 
     creature = await identify_from_image(db_session, image, settings.upload_dir, config)
     return creature

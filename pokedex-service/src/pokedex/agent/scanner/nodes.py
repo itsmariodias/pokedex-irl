@@ -35,7 +35,7 @@ async def analyze_image(state: ScannerState, config: RunnableConfig) -> ScannerS
         ]
     )
 
-    llm: BaseChatModel = config["configurable"].get("llm")
+    llm: BaseChatModel = config["configurable"].get("image_llm")
     structured_llm = llm.with_structured_output(CreatureName)
 
     logger.debug("Sending image to LLM...")
