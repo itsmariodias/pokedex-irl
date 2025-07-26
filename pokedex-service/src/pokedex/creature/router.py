@@ -1,12 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
 
 from pokedex.config import Settings, get_settings
 from pokedex.database import DbSession
 from pokedex.creature.dependencies import validate_image
 from pokedex.creature.models import CreaturePublic
-from pokedex.creature.service import identify_from_image, get, get_all
+from pokedex.creature.service import identify_from_image, get, get_all, delete
 from pokedex.llm import get_llm
 
 router = APIRouter(prefix="/creature", tags=["creature-identification"])
@@ -67,6 +67,47 @@ async def get_all_creatures(
 
     creatures = get_all(db_session)
     return creatures
+
+
+@router.delete(
+    "/{creature_id}",
+    responses={
+        200: {
+            "description": "Creature deleted successfully",
+            "content": {
+                "application/json": {"example": {"message": "Creature deleted"}}
+            },
+        },
+        404: {
+            "description": "Creature not found",
+            "content": {
+                "application/json": {"example": {"detail": "Creature not found"}}
+            },
+        },
+    },
+)
+async def delete_creature(
+    db_session: DbSession,
+    creature_id: int,
+):
+    """
+    Endpoint to delete a creature by its ID.
+
+    Args:
+        db_session: Database session
+        creature_id: The ID of the creature to delete
+
+    Returns:
+        A message indicating the deletion status
+    """
+    try:
+        delete(db_session, creature_id)
+        return {"message": "Creature deleted"}
+    except Exception:
+        raise HTTPException(
+            status_code=404,
+            detail="Creature not found",
+        )
 
 
 @router.post(

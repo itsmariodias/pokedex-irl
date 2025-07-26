@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import NavBar from './NavBar';
 import CreatureCard from './CreatureCard';
 
@@ -20,14 +20,21 @@ export interface Creature {
 
 const API_URL = 'http://localhost:8000/api/v1/creature/'; // Adjust if your FastAPI endpoint differs
 
-const CreatureList: React.FC = () => {
+export interface CreatureListHandle {
+  refresh: () => void;
+  showCreature: (creature: Creature) => void;
+}
+
+const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>((props, ref) => {
   const [creatures, setCreatures] = useState<Creature[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [popupCreature, setPopupCreature] = useState<Creature | null>(null);
   const [hovered, setHovered] = useState<Creature | null>(null);
 
-  useEffect(() => {
+  const fetchCreatures = () => {
+    setLoading(true);
+    setError(null);
     fetch(API_URL)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch creatures');
@@ -41,7 +48,16 @@ const CreatureList: React.FC = () => {
         setError(err.message);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchCreatures();
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    refresh: fetchCreatures,
+    showCreature: (creature: Creature) => setPopupCreature(creature),
+  }));
 
   if (loading) return <div>Loading creatures...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -84,7 +100,7 @@ const CreatureList: React.FC = () => {
 
   return (
     <div style={pokedexStyles}>
-      <NavBar />
+      <NavBar onScanClick={props.onScanClick} />
       <div style={{
         display: 'flex',
         flex: 1,
@@ -205,6 +221,6 @@ const CreatureList: React.FC = () => {
       )}
     </div>
   );
-}
+});
 
 export default CreatureList;

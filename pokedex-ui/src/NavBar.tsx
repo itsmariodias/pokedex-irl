@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import ScanPopup from './ScanPopup';
+import React from 'react';
 
 const navStyles: React.CSSProperties = {
   background: '#d32f2f',
@@ -41,38 +40,32 @@ const ledStyles: React.CSSProperties = {
   marginRight: 12,
 };
 
-const NavBar: React.FC = () => {
-  const [showScanPopup, setShowScanPopup] = useState(false);
-
+const NavBar: React.FC<{ onScanClick: () => void }> = ({ onScanClick }) => {
   return (
-    <>
-      <nav style={navStyles}>
-        <div style={navLeftStyles}>
-          <div style={ledStyles}></div>
-          <span style={navTitleStyles}>Pokédex IRL</span>
-        </div>
-        <button
-          style={{
-            background: '#fff',
-            color: '#d32f2f',
-            border: 'none',
-            borderRadius: 20,
-            padding: '0.5rem 1.5rem',
-            fontWeight: 700,
-            fontSize: '1.1rem',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            transition: 'background 0.2s, color 0.2s',
-            marginLeft: 24,
-          }}
-          onClick={() => setShowScanPopup(true)}
-        >
-          Scan
-        </button>
-      </nav>
-      {/* Scan Popup */}
-      <ScanPopup open={showScanPopup} onClose={() => setShowScanPopup(false)} />
-    </>
+    <nav style={navStyles}>
+      <div style={navLeftStyles}>
+        <div style={ledStyles}></div>
+        <span style={navTitleStyles}>Pokédex IRL</span>
+      </div>
+      <button
+        style={{
+          background: '#fff',
+          color: '#d32f2f',
+          border: 'none',
+          borderRadius: 20,
+          padding: '0.5rem 1.5rem',
+          fontWeight: 700,
+          fontSize: '1.1rem',
+          cursor: 'pointer',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          transition: 'background 0.2s, color 0.2s',
+          marginLeft: 24,
+        }}
+        onClick={onScanClick}
+      >
+        Scan
+      </button>
+    </nav>
   );
 };
 
