@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import NavBar from './NavBar';
+import CreatureCard from './CreatureCard';
 
 // Define the Creature type based on your FastAPI CreaturePublic schema
 export interface Creature {
@@ -19,11 +21,11 @@ export interface Creature {
 const API_URL = 'http://localhost:8000/api/v1/creature/'; // Adjust if your FastAPI endpoint differs
 
 const CreatureList: React.FC = () => {
-
   const [creatures, setCreatures] = useState<Creature[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<Creature | null>(null);
+  const [popupCreature, setPopupCreature] = useState<Creature | null>(null);
+  const [hovered, setHovered] = useState<Creature | null>(null);
 
   useEffect(() => {
     fetch(API_URL)
@@ -41,7 +43,6 @@ const CreatureList: React.FC = () => {
       });
   }, []);
 
-
   if (loading) return <div>Loading creatures...</div>;
   if (error) return <div>Error: {error}</div>;
 
@@ -54,29 +55,6 @@ const CreatureList: React.FC = () => {
     fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',
     display: 'flex',
     flexDirection: 'column',
-  };
-  const headerStyles: React.CSSProperties = {
-    background: '#d32f2f',
-    color: 'white',
-    padding: '1.5rem 2rem 1rem 2rem',
-    borderBottom: '4px solid #b71c1c',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 16,
-    width: '100%',
-    margin: 0,
-  };
-  const ledStyles: React.CSSProperties = {
-    width: 24,
-    height: 24,
-    borderRadius: '50%',
-    background: 'radial-gradient(circle at 30% 30%, #90caf9 70%, #1976d2 100%)',
-    border: '2px solid #1976d2',
-    boxShadow: '0 0 8px #1976d2',
-    marginRight: 12,
   };
   const listStyles: React.CSSProperties = {
     listStyle: 'none',
@@ -106,10 +84,7 @@ const CreatureList: React.FC = () => {
 
   return (
     <div style={pokedexStyles}>
-      <div style={headerStyles}>
-        <div style={ledStyles}></div>
-        <h1 style={{margin: 0, fontWeight: 900, letterSpacing: 2, fontSize: '2rem'}}>Pokédex IRL</h1>
-      </div>
+      <NavBar />
       <div style={{
         display: 'flex',
         flex: 1,
@@ -120,7 +95,7 @@ const CreatureList: React.FC = () => {
         boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
         overflow: 'hidden',
       }}>
-        {/* Left panel: selected creature image */}
+        {/* Left panel: hovered creature image */}
         <div style={{
           flex: 1.2,
           background: 'linear-gradient(120deg, #fff 60%, #f8bbd0 100%)',
@@ -130,10 +105,10 @@ const CreatureList: React.FC = () => {
           minHeight: 400,
           borderRight: '2px solid #e57373',
         }}>
-        {selected ? (
+        {hovered ? (
           <img
-            src={`http://localhost:8000/api/v1/static/uploads/${selected.image_path.replace(/^.*[\\\/]/, '')}`}
-            alt={selected.name}
+            src={`http://localhost:8000/api/v1/static/uploads/${hovered.image_path.replace(/^.*[\\\/]/, '')}`}
+            alt={hovered.name}
             style={{
               width: 340,
               height: 340,
@@ -160,12 +135,15 @@ const CreatureList: React.FC = () => {
               style={{
                 ...cardStyles,
                 cursor: 'pointer',
-                background: selected && selected.id === creature.id ? '#ffe0e0' : 'white',
-                borderColor: selected && selected.id === creature.id ? '#d32f2f' : '#bdbdbd',
+                background: (hovered && hovered.id === creature.id) ? '#ffe0e0' : 'white',
+                borderColor: (hovered && hovered.id === creature.id) ? '#d32f2f' : '#bdbdbd',
                 transition: 'background 0.2s, border 0.2s',
                 alignItems: 'center',
+                position: 'relative',
               }}
-              onClick={() => setSelected(creature)}
+              onMouseEnter={() => setHovered(creature)}
+              onClick={() => setPopupCreature(creature)}
+              onDoubleClick={() => setPopupCreature(creature)}
             >
               <img
                 src={`http://localhost:8000/api/v1/static/uploads/${creature.image_path.replace(/^.*[\\\/]/, '')}`}
@@ -205,8 +183,28 @@ const CreatureList: React.FC = () => {
           </ul>
         </div>
       </div>
+      {/* Popup for creature details */}
+      {popupCreature && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.45)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onClick={() => setPopupCreature(null)}
+        >
+          <CreatureCard creature={popupCreature} onClose={() => setPopupCreature(null)} />
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default CreatureList;
