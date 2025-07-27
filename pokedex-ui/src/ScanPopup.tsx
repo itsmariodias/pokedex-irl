@@ -26,7 +26,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // (removed duplicate handleAnalyze)
 

@@ -71,9 +71,55 @@ const CreatureCard: React.FC<CreatureCardProps> = ({ creature, onClose }) => (
         <tr><td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Kingdom:</td><td>{creature.kingdom}</td></tr>
         <tr><td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Classification:</td><td>{creature.classification}</td></tr>
         <tr><td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Family:</td><td>{creature.family}</td></tr>
-        <tr><td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Body Shape:</td><td>{creature.body_shape}</td></tr>
-        <tr><td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Gender Ratio:</td><td>{creature.gender_ratio}</td></tr>
-        <tr><td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Height:</td><td>{creature.height} cm</td></tr>
+        <tr>
+          <td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Body Shape:</td>
+          <td style={{display: 'flex', alignItems: 'center', gap: 10}}>
+            {(() => {
+              // Extract key after 'bsi:' or use as is
+              const match = /bsi:(.+)/.exec(creature.body_shape);
+              const key = match ? match[1] : creature.body_shape;
+              // Use Vite's import.meta.glob to import all icons
+              const icons = import.meta.glob('./assets/body_shape_icons/*.png', { eager: true, import: 'default' });
+              const iconPath = key ? `./assets/body_shape_icons/${key}.png` : null;
+              const iconSrc = iconPath && icons[iconPath] ? icons[iconPath] : null;
+              return (
+                <>
+                  {iconSrc && (
+                    <img
+                      src={iconSrc as string}
+                      alt={key}
+                      style={{width: 32, height: 32, objectFit: 'contain', verticalAlign: 'middle'}}
+                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  )}
+                </>
+              );
+            })()}
+          </td>
+        </tr>
+        <tr>
+          <td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0', verticalAlign: 'top'}}>Gender Ratio:</td>
+          <td>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <span style={{fontSize: '1.1em', color: '#2196f3', fontWeight: 700, minWidth: 22, textAlign: 'right'}}>♂️</span>
+              <div style={{width: 180, height: 18, borderRadius: 10, overflow: 'hidden', display: 'flex', boxShadow: '0 1px 4px #eee', border: '1px solid #e0e0e0'}} title={`♂️:♀️ = ${creature.gender_ratio}:1`}>
+                {(() => {
+                  // gender_ratio: number of males per 1 female
+                  const ratio = Math.max(0, creature.gender_ratio) / 2;
+                  const total = 1;
+                  const malePercent = (ratio / total) * 100;
+                  const femalePercent = (1 - ratio / total) * 100;
+                  return <>
+                    <div style={{width: `${malePercent}%`, background: 'linear-gradient(90deg, #2196f3 70%, #90caf9 100%)', height: '100%'}}></div>
+                    <div style={{width: `${femalePercent}%`, background: 'linear-gradient(90deg, #f06292 70%, #f8bbd0 100%)', height: '100%'}}></div>
+                  </>;
+                })()}
+              </div>
+              <span style={{fontSize: '1.1em', color: '#f06292', fontWeight: 700, minWidth: 22, textAlign: 'left'}}>♀️</span>
+            </div>
+          </td>
+        </tr>
+        <tr><td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Height:</td><td>{creature.height} m</td></tr>
         <tr><td style={{fontWeight: 600, padding: '0.3rem 0.7rem 0.3rem 0'}}>Weight:</td><td>{creature.weight} kg</td></tr>
       </tbody>
     </table>
