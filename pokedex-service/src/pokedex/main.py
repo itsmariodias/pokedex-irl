@@ -8,7 +8,6 @@ from loguru import logger
 from pokedex.config import settings
 from pokedex.database import create_db_and_tables
 from pokedex.creature.router import router as creature_router
-from pokedex.llm import get_llm
 
 logger.info("Starting Pokedex Service...")
 
@@ -37,15 +36,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # React dev server
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.mount("/static", StaticFiles(directory=settings.static_dir), name="static")
-
-get_llm(settings.default_model)
 
 app.include_router(creature_router)
 
