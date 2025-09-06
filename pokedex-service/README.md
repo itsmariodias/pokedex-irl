@@ -9,6 +9,9 @@ Backend service for the PokeDex IRL project that identifies real-world creatures
 - CRUD operations for creature data
 - SQLite database storage
 - FastAPI-based REST API
+- Modular agent system for advanced reasoning and explanations
+- Agents implemented via LangGraph for scanning and explaining creatures
+- Extensible architecture for new agent types
 
 ## Tech Stack
 
@@ -18,6 +21,8 @@ Backend service for the PokeDex IRL project that identifies real-world creatures
 - SQLite
 - Pydantic
 - Uvicorn
+- LangGraph (agents)
+- OpenAI (LLM integration)
 
 ## Setup
 
@@ -55,15 +60,31 @@ Once running, access the API documentation at:
 ```
 src/
 └── pokedex/
-    ├── config.py         # Application configuration
-    ├── database.py       # Database setup and sessions
-    ├── main.py          # FastAPI application setup
-    └── creature/         # Creature identification module
+    ├── config.py            # Application configuration
+    ├── database.py          # Database setup and sessions
+    ├── llm.py               # LLM integration (OpenAI)
+    ├── main.py              # FastAPI application setup
+    ├── agent/               # Modular agent system (LangGraph)
+    │   ├── agents.py        # Agent registry and orchestration
+    │   ├── explainer/       # Explainer agent (LangGraph)
+    │   │   ├── agent.py     # Explainer agent logic
+    │   │   ├── nodes.py     # Explainer agent nodes
+    │   │   └── schema.py    # Explainer agent schema
+    │   └── scanner/         # Scanner agent (LangGraph)
+    │       ├── agent.py     # Scanner agent logic
+    │       ├── nodes.py     # Scanner agent nodes
+    │       └── schema.py    # Scanner agent schema
+    └── creature/            # Creature identification module
         ├── dependencies.py  # FastAPI dependencies
-        ├── models.py       # Data models
-        ├── router.py       # API routes
-        ├── service.py      # Business logic
-        └── utils.py        # Helper functions
+        ├── enums.py         # Creature enums
+        ├── models.py        # Data models
+        ├── router.py        # API routes
+        ├── service.py       # Business logic
+        ├── utils.py         # Helper functions
+        ├── test_dependencies.py # Tests for dependencies
+        ├── test_router.py       # Tests for API routes
+        ├── test_service.py      # Tests for business logic
+        ├── test_utils.py        # Tests for utils
 ```
 
 ## License
