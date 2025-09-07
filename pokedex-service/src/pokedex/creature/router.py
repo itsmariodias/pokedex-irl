@@ -1,15 +1,88 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from pokedex.config import Settings, get_settings
 from pokedex.database import DbSession
 from pokedex.creature.dependencies import validate_image
 from pokedex.creature.models import CreaturePublic
-from pokedex.creature.service import identify_from_image, get, get_all, delete
+from pokedex.creature.service import (
+    identify_from_image,
+    get,
+    get_all,
+    delete,
+    search_creatures,
+)
 from pokedex.llm import get_llm
 
 router = APIRouter(prefix="/creature", tags=["creature-identification"])
+
+
+@router.get(
+    "/search",
+    response_model=list[CreaturePublic],
+    responses={
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {"example": {"detail": "Invalid query parameters"}}
+            },
+        }
+    },
+)
+async def search_creature(
+    db_session: DbSession,
+    name: str = None,
+    scientific_name: str = None,
+    kingdom: str = None,
+    classification: str = None,
+    family: str = None,
+    body_shape: str = None,
+    height_min: float = None,
+    height_max: float = None,
+    weight_min: float = None,
+    weight_max: float = None,
+    gender_ratio_min: float = None,
+    gender_ratio_max: float = None,
+):
+    """
+    Search for creatures with multiple filters.
+
+    Args:
+        db_session: Database session
+        name: Filter by creature name (partial match)
+        scientific_name: Filter by scientific name (partial match)
+        kingdom: Filter by kingdom (exact match)
+        classification: Filter by classification (exact match)
+        family: Filter by family (exact match)
+        body_shape: Filter by body shape (exact match)
+        height_min: Minimum height filter
+        height_max: Maximum height filter
+        weight_min: Minimum weight filter
+        weight_max: Maximum weight filter
+        gender_ratio_min: Minimum gender ratio filter
+        gender_ratio_max: Maximum gender ratio filter
+
+    Returns:
+        List of creatures matching the filters
+    """
+
+    creatures = await search_creatures(
+        db_session=db_session,
+        name=name,
+        scientific_name=scientific_name,
+        kingdom=kingdom,
+        classification=classification,
+        family=family,
+        body_shape=body_shape,
+        height_min=height_min,
+        height_max=height_max,
+        weight_min=weight_min,
+        weight_max=weight_max,
+        gender_ratio_min=gender_ratio_min,
+        gender_ratio_max=gender_ratio_max,
+    )
+    return creatures
 
 
 @router.get(

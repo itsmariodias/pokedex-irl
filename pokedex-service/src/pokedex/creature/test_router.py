@@ -146,17 +146,97 @@ def test_identify_creature_invalid_image(mocker, test_client):
     }
 
 
-def test_identify_creature_error(mocker, test_client):
-    """Test the identify_creature endpoint when an error occurs."""
-    mock_identify = mocker.patch("pokedex.creature.router.identify_from_image")
-    mock_identify.side_effect = HTTPException(
+def test_search_creature_no_filters(mocker, test_client, mock_creature):
+    """Test the search_creature endpoint with no filters."""
+    mock_search = mocker.patch("pokedex.creature.router.search_creatures")
+    mock_search.return_value = [mock_creature]
+
+    response = test_client.get("/api/v1/creature/search")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            **mock_creature.model_dump(),
+            "body_shape": mock_creature.body_shape.value,
+        }
+    ]
+    mock_search.assert_called_once()
+
+
+def test_search_creature_with_filters(mocker, test_client, mock_creature):
+    """Test the search_creature endpoint with multiple filters."""
+    mock_search = mocker.patch("pokedex.creature.router.search_creatures")
+    mock_search.return_value = [mock_creature]
+
+    params = {
+        "name": "Lion",
+        "scientific_name": "Panthera",
+        "kingdom": "Animalia",
+        "classification": "Mammal",
+        "family": "Felidae",
+        "body_shape": "QUADRUPED",
+        "height_min": 1.0,
+        "height_max": 2.0,
+        "weight_min": 100.0,
+        "weight_max": 200.0,
+        "gender_ratio_min": 0.4,
+        "gender_ratio_max": 0.6,
+    }
+    response = test_client.get("/api/v1/creature/search", params=params)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            **mock_creature.model_dump(),
+            "body_shape": mock_creature.body_shape.value,
+        }
+    ]
+    mock_search.assert_called_once()
+
+
+def test_search_creature_empty(mocker, test_client):
+    """Test the search_creature endpoint returns empty list."""
+    mock_search = mocker.patch("pokedex.creature.router.search_creatures")
+    mock_search.return_value = []
+
+    response = test_client.get("/api/v1/creature/search")
+
+    assert response.status_code == 200
+    assert response.json() == []
+    mock_search.assert_called_once()
+
+
+def test_search_creature_error(mocker, test_client):
+    """Test the search_creature endpoint when an error occurs."""
+    mock_search = mocker.patch("pokedex.creature.router.search_creatures")
+    mock_search.side_effect = HTTPException(
         status_code=500, detail="Internal Server Error"
     )
 
-    response = test_client.post(
-        "/api/v1/creature/identify",
-        files={"image": ("invalid_image.png", b"image_data")},
-    )
+    response = test_client.get("/api/v1/creature/search")
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Internal Server Error"}
+
+
+def test_delete_creature_success(mocker, test_client):
+    """Test the delete_creature endpoint with a valid creature ID."""
+    mock_delete = mocker.patch("pokedex.creature.router.delete")
+    mock_delete.return_value = None
+
+    response = test_client.delete("/api/v1/creature/1")
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Creature deleted"}
+    mock_delete.assert_called_once_with(mocker.ANY, 1)
+
+
+def test_delete_creature_not_found(mocker, test_client):
+    """Test the delete_creature endpoint with a non-existent creature ID."""
+    mock_delete = mocker.patch("pokedex.creature.router.delete")
+    mock_delete.side_effect = Exception("Not found")
+
+    response = test_client.delete("/api/v1/creature/999")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Creature not found"}

@@ -1,9 +1,12 @@
+from math import e
+import os
 from loguru import logger
 from fastapi import HTTPException, UploadFile
 from langchain_core.runnables import RunnableConfig
-from pokedex.agent.explainer.schema import CreatureExplanation
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 
+from pokedex.agent.explainer.schema import CreatureExplanation
 from pokedex.creature.models import Creature, CreatureCreate, CreatureUpdate
 from pokedex.creature.utils import upload_file
 from pokedex.agent.agents import get_agent
@@ -174,29 +177,104 @@ async def identify_from_image(
     await image.seek(0)
     file_path = await upload_file(image, upload_dir)
 
-    explainer_agent = get_agent("explainer-agent")
+    try:
+        explainer_agent = get_agent("explainer-agent")
 
-    # Get the creature details from the explainer agent
-    creature_details = await explainer_agent.ainvoke({"creature_name": creature_name}, config)
+        # Get the creature details from the explainer agent
+        creature_details = await explainer_agent.ainvoke({"creature_name": creature_name}, config)
 
-    creature_details: CreatureExplanation = creature_details["creature"]
+        creature_details: CreatureExplanation = creature_details["creature"]
 
-    # Create a new Creature object
-    creature = CreatureCreate(
-        name=creature_name,
-        scientific_name=creature_details.scientific_name,
-        description=creature_details.description,
-        gender_ratio=creature_details.gender_ratio,
-        kingdom=creature_details.kingdom,
-        classification=creature_details.classification,
-        family=creature_details.family,
-        height=creature_details.height,
-        weight=creature_details.weight,
-        body_shape=creature_details.body_shape,
-        image_path=file_path,
-    )
+        # Create a new Creature object
+        creature = CreatureCreate(
+            name=creature_name,
+            scientific_name=creature_details.scientific_name,
+            description=creature_details.description,
+            gender_ratio=creature_details.gender_ratio,
+            kingdom=creature_details.kingdom,
+            classification=creature_details.classification,
+            family=creature_details.family,
+            height=creature_details.height,
+            weight=creature_details.weight,
+            body_shape=creature_details.body_shape,
+            image_path=file_path,
+        )
 
-    logger.info(f"Adding new creature to the database: {creature.model_dump()}")
+        logger.info(f"Adding new creature to the database: {creature.model_dump()}")
 
-    # If it doesn't exist, create a new one and return it
-    return create(db_session, creature)
+        # If it doesn't exist, create a new one and return it
+        return create(db_session, creature)
+    except Exception:
+        os.remove(file_path) # Clean up the uploaded file in case of error
+        raise
+
+
+async def search_creatures(
+    db_session: Session,
+    name: str = None,
+    scientific_name: str = None,
+    kingdom: str = None,
+    classification: str = None,
+    family: str = None,
+    body_shape: str = None,
+    height_min: float = None,
+    height_max: float = None,
+    weight_min: float = None,
+    weight_max: float = None,
+    gender_ratio_min: float = None,
+    gender_ratio_max: float = None,
+) -> list[Creature]:
+    """
+    Search for creatures based on various filters.
+
+    Args:
+        db_session (Session): Database session
+        name (str, optional): Filter by name
+        scientific_name (str, optional): Filter by scientific name
+        kingdom (str, optional): Filter by kingdom
+        classification (str, optional): Filter by classification
+        family (str, optional): Filter by family
+        body_shape (str, optional): Filter by body shape
+        height_min (float, optional): Minimum height filter
+        height_max (float, optional): Maximum height filter
+        weight_min (float, optional): Minimum weight filter
+        weight_max (float, optional): Maximum weight filter
+        gender_ratio_min (float, optional): Minimum gender ratio filter
+        gender_ratio_max (float, optional): Maximum gender ratio filter
+    
+    Returns:
+        list[Creature]: List of creatures matching the filters
+    """
+
+    query = db_session.query(Creature)
+    filters = []
+
+    if name:
+        filters.append(Creature.name.ilike(f"%{name}%"))
+    if scientific_name:
+        filters.append(Creature.scientific_name.ilike(f"%{scientific_name}%"))
+    if kingdom:
+        filters.append(Creature.kingdom.ilike(f"%{kingdom}%"))
+    if classification:
+        filters.append(Creature.classification.ilike(f"%{classification}%"))
+    if family:
+        filters.append(Creature.family.ilike(f"%{family}%"))
+    if body_shape:
+        filters.append(Creature.body_shape.ilike(f"%{body_shape}%"))
+    if height_min is not None:
+        filters.append(Creature.height >= height_min)
+    if height_max is not None:
+        filters.append(Creature.height <= height_max)
+    if weight_min is not None:
+        filters.append(Creature.weight >= weight_min)
+    if weight_max is not None:
+        filters.append(Creature.weight <= weight_max)
+    if gender_ratio_min is not None:
+        filters.append(Creature.gender_ratio >= gender_ratio_min)
+    if gender_ratio_max is not None:
+        filters.append(Creature.gender_ratio <= gender_ratio_max)
+
+    if filters:
+        query = query.filter(and_(*filters))
+
+    return query.all()

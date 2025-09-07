@@ -11,7 +11,7 @@ class CreatureBase(SQLModel):
     """
 
     name: str = Field(unique=True, index=True)
-    scientific_name: str = Field(unique=True)
+    scientific_name: str
     description: str
     gender_ratio: float
     kingdom: str

@@ -79,8 +79,17 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
   // Capture image from webcam as a perfect circle
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
       const size = 240;
-      const context = canvasRef.current.getContext('2d');
+      // Get video dimensions
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      // Find the largest centered square
+      const side = Math.min(videoWidth, videoHeight);
+      const sx = (videoWidth - side) / 2;
+      const sy = (videoHeight - side) / 2;
       if (context) {
         context.clearRect(0, 0, size, size);
         context.save();
@@ -88,16 +97,15 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
         context.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
         context.closePath();
         context.clip();
-        context.drawImage(videoRef.current, 0, 0, size, size);
+        // Draw the cropped square from the video to the canvas
+        context.drawImage(video, sx, sy, side, side, 0, 0, size, size);
         context.restore();
-        canvasRef.current.toBlob((blob) => {
+        canvas.toBlob((blob) => {
           if (blob) {
             const file = new File([blob], 'webcam.png', { type: 'image/png' });
             setImageFile(file);
-            if (canvasRef.current) {
-              setImagePreview(canvasRef.current.toDataURL('image/png'));
-              setImageReady(true);
-            }
+            setImagePreview(canvas.toDataURL('image/png'));
+            setImageReady(true);
           }
         }, 'image/png');
       }
@@ -229,10 +237,18 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                 }}
               />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 12 }}>
-                <span>
-                  <img src={spinner} alt="Loading" style={{ width: 28, height: 28, verticalAlign: 'middle' }} />
-                </span>
-                <span style={{ fontWeight: 700, color: '#d32f2f', fontSize: '1.2rem' }}>Analyzing...</span>
+                {error ? (
+                  <span style={{ fontWeight: 500, color: '#d32f2f', fontSize: '0.95rem' }}>
+                    Something went wrong, please try again
+                  </span>
+                ) : (
+                  <>
+                    <span>
+                      <img src={spinner} alt="Loading" style={{ width: 28, height: 28, verticalAlign: 'middle' }} />
+                    </span>
+                    <span style={{ fontWeight: 700, color: '#d32f2f', fontSize: '1.2rem' }}>Analyzing...</span>
+                  </>
+                )}
               </div>
             </div>
           ) : imagePreview && imageReady ? (

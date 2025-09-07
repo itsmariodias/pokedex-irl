@@ -177,7 +177,9 @@ async def test_identify_from_image_existing(mocker, mock_db_session, mock_creatu
 
     mocker.patch("pokedex.creature.service.get_agent", side_effect=agent_side_effect)
 
-    result = await identify_from_image(mock_db_session, mock_image, "upload_dir", config={})
+    result = await identify_from_image(
+        mock_db_session, mock_image, "upload_dir", config={}
+    )
 
     assert result == mock_creature
 
@@ -230,7 +232,95 @@ async def test_identify_from_image_new(mocker, mock_db_session):
 
     mocker.patch("pokedex.creature.service.get_agent", side_effect=agent_side_effect)
 
-    result = await identify_from_image(mock_db_session, mock_image, "upload_dir", config={})
+    result = await identify_from_image(
+        mock_db_session, mock_image, "upload_dir", config={}
+    )
 
     assert isinstance(result, Creature)
     mock_db_session.add.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_search_creatures_no_filters(mock_db_session, mock_creature):
+    """Test search_creatures with no filters returns all creatures."""
+    mock_db_session.query.return_value.all.return_value = [mock_creature]
+    import pokedex.creature.service as service
+
+    result = await service.search_creatures(mock_db_session)
+    assert result == [mock_creature]
+    mock_db_session.query.assert_called_once_with(Creature)
+    mock_db_session.query.return_value.all.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_search_creatures_name_filter(mock_db_session, mock_creature):
+    """Test search_creatures with name filter."""
+    mock_query = mock_db_session.query.return_value
+    mock_query.filter.return_value.all.return_value = [mock_creature]
+    import pokedex.creature.service as service
+
+    result = await service.search_creatures(mock_db_session, name="Lion")
+    assert result == [mock_creature]
+    mock_query.filter.assert_called_once()
+    mock_query.filter.return_value.all.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_search_creatures_multiple_filters(mock_db_session, mock_creature):
+    """Test search_creatures with multiple filters."""
+    mock_query = mock_db_session.query.return_value
+    mock_query.filter.return_value.all.return_value = [mock_creature]
+    import pokedex.creature.service as service
+
+    result = await service.search_creatures(
+        mock_db_session,
+        name="Lion",
+        scientific_name="Panthera",
+        kingdom="Animalia",
+        classification="Mammal",
+        family="Felidae",
+        body_shape="QUADRUPED",
+        height_min=1.0,
+        height_max=2.0,
+        weight_min=100.0,
+        weight_max=200.0,
+        gender_ratio_min=0.4,
+        gender_ratio_max=0.6,
+    )
+    assert result == [mock_creature]
+    mock_query.filter.assert_called_once()
+    mock_query.filter.return_value.all.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_search_creatures_min_max_filters(mock_db_session, mock_creature):
+    """Test search_creatures with only min/max filters."""
+    mock_query = mock_db_session.query.return_value
+    mock_query.filter.return_value.all.return_value = [mock_creature]
+    import pokedex.creature.service as service
+
+    result = await service.search_creatures(
+        mock_db_session,
+        height_min=1.0,
+        height_max=2.0,
+        weight_min=100.0,
+        weight_max=200.0,
+        gender_ratio_min=0.4,
+        gender_ratio_max=0.6,
+    )
+    assert result == [mock_creature]
+    mock_query.filter.assert_called_once()
+    mock_query.filter.return_value.all.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_search_creatures_no_results(mock_db_session):
+    """Test search_creatures returns empty list if no match."""
+    mock_query = mock_db_session.query.return_value
+    mock_query.filter.return_value.all.return_value = []
+    import pokedex.creature.service as service
+
+    result = await service.search_creatures(mock_db_session, name="NotFound")
+    assert result == []
+    mock_query.filter.assert_called_once()
+    mock_query.filter.return_value.all.assert_called_once()
