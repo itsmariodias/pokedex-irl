@@ -41,7 +41,8 @@ Frontend for the Pokedex IRL project, providing a modern interface for scanning,
 ```
 pokedex-ui/
 ├── public/                # Static assets
-│   └── vite.svg
+│   └── favicon.ico
+│   └── ...
 ├── src/                   # Source code
 │   ├── App.tsx            # Main app component
 │   ├── App.css            # App styles
@@ -50,7 +51,6 @@ pokedex-ui/
 │   ├── CreatureCard.tsx   # Creature detail card
 │   ├── ScanPopup.tsx      # Scan popup/modal
 │   ├── assets/            # Images and icons
-│   │   ├── react.svg
 │   │   ├── spinner.gif
 │   │   └── body_shape_icons/
 │   │       ├── bipedal.png
