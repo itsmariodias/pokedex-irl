@@ -27,7 +27,7 @@ const CreatureCard: React.FC<CreatureCardProps> = ({ creature, onClose }) => (
         position: 'absolute',
         top: 18,
         right: 18,
-        background: '#d32f2f',
+        background: 'var(--pokedex-red)',
         color: 'white',
         border: 'none',
         borderRadius: '50%',
@@ -63,7 +63,7 @@ const CreatureCard: React.FC<CreatureCardProps> = ({ creature, onClose }) => (
         (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
       }}
     />
-    <h2 style={{margin: '0 0 0.5rem 0', color: '#d32f2f', fontWeight: 900, fontSize: '2rem'}}>{creature.name}</h2>
+    <h2 style={{margin: '0 0 0.5rem 0', color: 'var(--pokedex-red)', fontWeight: 900, fontSize: '2rem'}}>{creature.name}</h2>
     <h4 style={{margin: '0 0 1.2rem 0', color: '#616161', fontWeight: 500, fontStyle: 'italic'}}>{creature.scientific_name}</h4>
     <p style={{margin: '0 0 1.2rem 0', color: '#333', fontSize: '1.1rem', textAlign: 'center'}}>{creature.description}</p>
     <table style={{width: '100%', fontSize: '1.05rem', color: '#444', marginBottom: 0}}>

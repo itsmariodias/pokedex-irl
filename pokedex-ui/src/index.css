@@ -1,5 +1,17 @@
 :root {
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  --pokedex-red: #d32f2f;
+  --pokedex-dark-red: #b71c1c;
+  --pokedex-yellow: #fbc02d;
+  --pokedex-dark-yellow: #fff176;
+  --pokedex-green: #388e3c;
+  --pokedex-light-green: #81c784;
+  --pokedex-blue: #1976d2;
+  --pokedex-light-blue: #90caf9;
+  --pokedex-gray: #bdbdbd;
+  --pokedex-dark-gray: #616161;
+  --pokedex-bg: #f7f7f7;
+  --pokedex-screen-bg: #6ea96e;
   line-height: 1.5;
   font-weight: 400;
 
@@ -24,10 +36,33 @@ a:hover {
 
 body {
   margin: 0;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  background: #87ceeb;
+}
+
+.pokedex-outer-bg {
+  min-height: 100vh;
+  min-width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #87ceeb;
+}
+
+.pokedex-16-9 {
+  position: relative;
+  width: 90vw;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  background: #242424;
+  border-radius: 32px;
+  box-shadow: 0 8px 48px 0px rgba(0,0,0,0.28);
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 h1 {

@@ -31,6 +31,7 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
   const [error, setError] = useState<string | null>(null);
   const [popupCreature, setPopupCreature] = useState<Creature | null>(null);
   const [hovered, setHovered] = useState<Creature | null>(null);
+  const [selected, setSelected] = useState<Creature | null>(null);
 
   const fetchCreatures = () => {
     setLoading(true);
@@ -65,35 +66,43 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
 
   // Pokedex-inspired styles
   const pokedexStyles: React.CSSProperties = {
-    background: 'linear-gradient(135deg, #f44336 0%, #b71c1c 100%)',
-    minHeight: '100vh',
+    background: 'linear-gradient(135deg, var(--pokedex-red) 0%, var(--pokedex-dark-red) 100%)',
+    height: '100%',
+    width: '100%',
     padding: 0,
     fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',
     display: 'flex',
     flexDirection: 'column',
+    overflow: 'hidden',
+    borderRadius: 32,
   };
   const listStyles: React.CSSProperties = {
     listStyle: 'none',
     padding: 0,
     margin: '2rem auto',
-    maxWidth: 600,
+    width: '95%',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
   };
   const cardStyles: React.CSSProperties = {
-    background: 'white',
-    border: '2px solid #bdbdbd',
+    background: 'var(--pokedex-bg)',
+    border: '2px solid var(--pokedex-gray)',
     borderRadius: 16,
     marginBottom: '2rem',
-    padding: 20,
+    padding: '1.2vw',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
     display: 'flex',
     alignItems: 'center',
-    gap: 24,
+    gap: '2vw',
     position: 'relative',
+    minWidth: 0,
+    width: '100%',
+    boxSizing: 'border-box',
   };
   const nameStyles: React.CSSProperties = {
     fontSize: '1.4rem',
     fontWeight: 700,
-    color: '#d32f2f',
+    color: 'var(--pokedex-red)',
     margin: 0,
     lineHeight: 1.1,
   };
@@ -106,70 +115,117 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
         flex: 1,
         minHeight: 0,
         width: '100%',
+        height: '0',
+        flexGrow: 1,
         background: 'rgba(255,255,255,0.05)',
-        borderRadius: 24,
         boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
         overflow: 'hidden',
       }}>
-        {/* Left panel: hovered creature image */}
-        <div style={{
-          flex: 1.2,
-          background: 'linear-gradient(120deg, #fff 60%, #f8bbd0 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: 400,
-          borderRight: '2px solid #e57373',
-        }}>
-        {hovered ? (
-          <img
-            src={`http://localhost:8000/api/v1/static/uploads/${hovered.image_path.replace(/^.*[\\\/]/, '')}`}
-            alt={hovered.name}
+        {/* Left panel: red background, gray container, white inner container */}
+        <div
+          style={{
+            flex: 1,
+            background: 'linear-gradient(135deg, var(--pokedex-red) 0%, var(--pokedex-dark-red) 100%)', // red outer panel
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 0,
+            height: '100%',
+            borderRight: '2px solid var(--pokedex-red)',
+          }}
+        >
+          <div
             style={{
-              width: 340,
-              height: 340,
-              objectFit: 'cover',
-              borderRadius: '50%',
-              background: '#fff',
-              marginBottom: 0,
-              display: 'block',
+              width: '55%',
+              aspectRatio: '1 / 1', // force square for outer white border
+              background: 'var(--pokedex-bg)', // more whiteish middle container
+              borderRadius: '18px',
+              boxSizing: 'border-box',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+              border: '1px solid var(--pokedex-gray)',
+              overflow: 'hidden',
+              marginTop: '-16vw', // move container upwards
             }}
-            onError={e => {
-              (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
-            }}
-          />
-        ) : (
-          <div style={{color: '#bdbdbd', fontSize: '1.2rem'}}>Select an entry</div>
-        )}
+          >
+            <div
+              style={{
+                width: '80%',
+                height: '80%',
+                aspectRatio: '1 / 1', // force square for green screen
+                background: 'var(--pokedex-screen-bg)', // darker green like Gameboy screen
+                borderRadius: '12px',
+                boxSizing: 'border-box',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                border: '1px solid var(--pokedex-bg)',
+                overflow: 'hidden',
+              }}
+            >
+              {hovered ? (
+                <img
+                  src={`http://localhost:8000/api/v1/static/uploads/${hovered.image_path.replace(/^.*[\\\/]/, '')}`}
+                  alt={hovered.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '0',
+                    background: 'transparent',
+                    display: 'block',
+                  }}
+                  onError={e => {
+                    (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
+                  }}
+                />
+              ) : (
+                <div style={{ color: 'rgb(51, 51, 51)', fontSize: '1.2rem' }}></div>
+              )}
+            </div>
+          </div>
         </div>
-        {/* Right panel: list */}
-        <div style={{flex: 1.5, background: 'none', overflowY: 'auto', minHeight: 400}}>
+  {/* Right panel: list */}
+  <div style={{flex: 1, background: 'none', overflowY: 'auto', minHeight: 0, height: '100%'}}>
           <ul style={listStyles}>
             {creatures.map((creature) => (
             <li
               key={creature.id}
-              style={{
-                ...cardStyles,
-                cursor: 'pointer',
-                background: (hovered && hovered.id === creature.id) ? '#ffe0e0' : 'white',
-                borderColor: (hovered && hovered.id === creature.id) ? '#d32f2f' : '#bdbdbd',
-                transition: 'background 0.2s, border 0.2s',
-                alignItems: 'center',
-                position: 'relative',
-              }}
+                style={{
+                  ...cardStyles,
+                  cursor: 'pointer',
+                  background: (hovered && hovered.id === creature.id)
+                    ? 'var(--pokedex-bg)' // highlight on hover only
+                    : 'var(--pokedex-bg)',
+                  borderColor: 'var(--pokedex-red)',
+                  transition: 'background 0.2s, border 0.2s, filter 0.2s, transform 0.2s',
+                  alignItems: 'center',
+                  position: 'relative',
+                  transform:
+                    (selected && selected.id === creature.id) || (hovered && hovered.id === creature.id)
+                      ? 'scale(0.97)'
+                      : 'scale(1)',
+                  zIndex: (selected && selected.id === creature.id) ? 2 : 1,
+                }}
               onMouseEnter={() => setHovered(creature)}
-              onClick={() => setPopupCreature(creature)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => { setSelected(creature); setPopupCreature(creature); }}
               onDoubleClick={() => setPopupCreature(creature)}
             >
               <img
-                src={`http://localhost:8000/api/v1/static/uploads/${creature.image_path.replace(/^.*[\\\/]/, '')}`}
+                src={`http://localhost:8000/api/v1/static/uploads/${creature.image_path.replace(/^.*[\/]/, '')}`}
                 alt={creature.name}
                 style={{
                   width: 48,
                   height: 48,
                   objectFit: 'cover',
                   borderRadius: '50%',
-                  background: '#fff',
+                  background: 'var(--pokedex-bg)',
                   marginRight: 16,
                   display: 'inline-block',
                 }}
@@ -179,7 +235,7 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
               />
               <span style={{
                 fontWeight: 700,
-                color: '#616161',
+                color: 'var(--pokedex-dark-gray)',
                 fontSize: '1.1rem',
                 marginRight: 16,
                 minWidth: 32,
@@ -190,7 +246,7 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
               </span>
               <span style={{
                 ...nameStyles,
-                color: '#d32f2f',
+                color: 'var(--pokedex-red)',
                 fontSize: '1.3rem',
                 marginLeft: 12,
               }}>{creature.name}</span>

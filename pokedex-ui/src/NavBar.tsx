@@ -1,22 +1,23 @@
 import React from 'react';
 
 const navStyles: React.CSSProperties = {
-  background: '#d32f2f',
+  background: 'var(--pokedex-red)',
   color: 'white',
-  padding: '0.5rem 2.5rem',
-  borderBottom: '4px solid #b71c1c',
+  padding: '0.5vw 2vw',
+  borderBottom: '4px solid var(--pokedex-dark-red)',
   borderTopLeftRadius: 24,
   borderTopRightRadius: 24,
   boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  maxWidth: '100vw',
   minHeight: 64,
   margin: 0,
   position: 'relative',
   zIndex: 10,
   overflowX: 'auto',
+  flexWrap: 'nowrap',
+  gap: '1vw',
 };
 const navLeftStyles: React.CSSProperties = {
   display: 'flex',
@@ -31,33 +32,66 @@ const navTitleStyles: React.CSSProperties = {
   userSelect: 'none',
 };
 const ledStyles: React.CSSProperties = {
-  width: 24,
-  height: 24,
+  width: 40,
+  height: 40,
   borderRadius: '50%',
-  background: 'radial-gradient(circle at 30% 30%, #90caf9 70%, #1976d2 100%)',
-  border: '2px solid #1976d2',
-  boxShadow: '0 0 8px #1976d2',
-  marginRight: 12,
+  background: 'radial-gradient(circle at 30% 30%, var(--pokedex-light-blue) 70%, var(--pokedex-blue) 100%)',
+  border: '4px solid var(--pokedex-bg)',
+  marginRight: 18,
 };
 
+const smallCircle = (color: string) => ({
+  width: 16,
+  height: 16,
+  borderRadius: '50%',
+  background: color,
+  border: '2px solid var(--pokedex-bg)',
+  marginRight: 6,
+  boxShadow: '0 0 4px ' + color,
+});
+
 const NavBar: React.FC<{ onScanClick: () => void }> = ({ onScanClick }) => {
+  // Add keyframes for pulse animation
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .scan-animated {
+        transition: transform 0.18s cubic-bezier(.4,0,.2,1);
+      }
+      .scan-animated:hover {
+        transform: scale(1.05);
+      }
+      .scan-animated:active {
+        transform: scale(0.95);
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
   return (
     <nav style={navStyles}>
       <div style={navLeftStyles}>
         <div style={ledStyles}></div>
+        <div style={{ display: 'flex', alignItems: 'center', marginRight: 8 }}>
+          <div style={smallCircle('radial-gradient(circle at 30% 30%, var(--pokedex-red) 70%, var(--pokedex-dark-red) 100%)')}></div>
+          <div style={smallCircle('radial-gradient(circle at 30% 30%, var(--pokedex-yellow) 70%, var(--pokedex-dark-yellow) 100%)')}></div>
+          <div style={smallCircle('radial-gradient(circle at 30% 30%, var(--pokedex-light-green) 70%, var(--pokedex-green) 100%)')}></div>
+        </div>
         <span style={navTitleStyles}>Pokédex IRL</span>
       </div>
       <button
+        className="scan-animated"
         style={{
-          background: '#fff',
-          color: '#d32f2f',
+          background: '#2d2d2d', // softer black
+          color: '#fff',
           border: 'none',
-          borderRadius: 20,
-          padding: '0.5rem 1.5rem',
+          borderRadius: 24,
+          padding: '0.8rem 1.5rem',
           fontWeight: 700,
-          fontSize: '1.1rem',
+          fontSize: '1.2rem',
           cursor: 'pointer',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.12)',
           transition: 'background 0.2s, color 0.2s',
           marginLeft: 24,
         }}

@@ -7,6 +7,7 @@ import CreatureList from './CreatureList';
 import type { CreatureListHandle, Creature } from './CreatureList';
 import ScanPopup from './ScanPopup';
 
+
 function App() {
   const listRef = useRef<CreatureListHandle>(null);
   const [scanOpen, setScanOpen] = useState(false);
@@ -20,14 +21,16 @@ function App() {
   };
 
   return (
-    <>
-      <CreatureList ref={listRef} onScanClick={() => setScanOpen(true)} />
-      <ScanPopup
-        open={scanOpen}
-        onClose={() => setScanOpen(false)}
-        onScanResult={handleScanResult}
-      />
-    </>
+    <div className="pokedex-outer-bg">
+      <div className="pokedex-16-9">
+        <CreatureList ref={listRef} onScanClick={() => setScanOpen(true)} />
+        <ScanPopup
+          open={scanOpen}
+          onClose={() => setScanOpen(false)}
+          onScanResult={handleScanResult}
+        />
+      </div>
+    </div>
   );
 }
 

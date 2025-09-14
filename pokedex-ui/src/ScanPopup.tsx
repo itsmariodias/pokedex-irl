@@ -170,7 +170,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
         left: 0,
         width: '100vw',
         height: '100vh',
-        background: 'rgba(0,0,0,0.45)',
+          background: 'rgba(0,0,0,0.45)',
         zIndex: 2000,
         display: 'flex',
         alignItems: 'center',
@@ -180,16 +180,16 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
     >
       <div
         style={{
-          background: 'white',
-          borderRadius: 24,
-          padding: '2.5rem 2.5rem 2rem 2.5rem',
-          minWidth: 420,
-          maxWidth: 540,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+            background: 'var(--pokedex-bg)',
+            borderRadius: 24,
+            padding: '2.5rem 2.5rem 2rem 2.5rem',
+            minWidth: 420,
+            maxWidth: 540,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -198,8 +198,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
             position: 'absolute',
             top: 18,
             right: 18,
-            background: '#d32f2f',
-            color: 'white',
+              background: 'var(--pokedex-red)',
+              color: 'var(--pokedex-bg)',
             border: 'none',
             borderRadius: '50%',
             width: 40,
@@ -246,7 +246,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                     <span>
                       <img src={spinner} alt="Loading" style={{ width: 28, height: 28, verticalAlign: 'middle' }} />
                     </span>
-                    <span style={{ fontWeight: 700, color: '#d32f2f', fontSize: '1.2rem' }}>Analyzing...</span>
+                      <span style={{ fontWeight: 700, color: 'var(--pokedex-red)', fontSize: '1.2rem' }}>Analyzing...</span>
                   </>
                 )}
               </div>
@@ -262,7 +262,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                   borderRadius: '50%',
                   objectFit: 'cover',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                  background: '#eee',
+                    background: 'var(--pokedex-gray)',
                   display: 'block',
                   margin: '0 auto',
                 }}
@@ -270,8 +270,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
                 <button
                   style={{
-                    background: '#388e3c',
-                    color: 'white',
+                      background: 'var(--pokedex-green)',
+                      color: '#fff',
                     border: 'none',
                     borderRadius: 20,
                     padding: '0.5rem 1.5rem',
@@ -288,8 +288,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                 </button>
                 <button
                   style={{
-                    background: '#d32f2f',
-                    color: 'white',
+                      background: 'var(--pokedex-red)',
+                      color: '#fff',
                     border: 'none',
                     borderRadius: 20,
                     padding: '0.5rem 1.5rem',
@@ -309,8 +309,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
               <label
                 htmlFor="scan-upload-input"
                 style={{
-                  background: '#d32f2f',
-                  color: 'white',
+                    background: 'var(--pokedex-red)',
+                    color: 'var(--pokedex-bg)',
                   border: 'none',
                   borderRadius: 20,
                   padding: '0.5rem 1.5rem',
@@ -336,8 +336,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
               {!showCamera && (
                 <button
                   style={{
-                    background: '#d32f2f',
-                    color: 'white',
+                      background: 'var(--pokedex-red)',
+                      color: 'var(--pokedex-bg)',
                     border: 'none',
                     borderRadius: 20,
                     padding: '0.5rem 1.5rem',
@@ -359,7 +359,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                     height: 240,
                     borderRadius: '50%',
                     overflow: 'hidden',
-                    background: '#eee',
+                      background: 'var(--pokedex-gray)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -374,15 +374,15 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                         height: 240,
                         objectFit: 'cover',
                         borderRadius: '50%',
-                        background: '#eee',
+                          background: 'var(--pokedex-gray)',
                         display: 'block',
                       }}
                     />
                   </div>
                   <button
                     style={{
-                      background: '#388e3c',
-                      color: 'white',
+                        background: 'var(--pokedex-green)',
+                        color: '#fff',
                       border: 'none',
                       borderRadius: 20,
                       padding: '0.5rem 1.5rem',
