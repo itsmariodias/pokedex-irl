@@ -76,27 +76,47 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
     overflow: 'hidden',
     borderRadius: 32,
   };
+  const listScreenStyles: React.CSSProperties = {
+    background: 'var(--pokedex-black)',
+    border: '3px solid var(--pokedex-black)',
+    borderRadius: '18px',
+    width: '80%',
+    height: '48%', // top half
+    margin: '5% auto 0 auto',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    overflow: 'hidden',
+    position: 'relative',
+  };
   const listStyles: React.CSSProperties = {
     listStyle: 'none',
     padding: 0,
-    margin: '2rem auto',
-    width: '95%',
-    maxWidth: '100%',
+    paddingTop: 8,
+    paddingBottom: 8,
+    margin: 0,
+    width: '100%',
+    height: '100%',
+    overflowY: 'auto',
     boxSizing: 'border-box',
   };
   const cardStyles: React.CSSProperties = {
     background: 'var(--pokedex-bg)',
     border: '2px solid var(--pokedex-gray)',
-    borderRadius: 16,
-    marginBottom: '2rem',
-    padding: '1.2vw',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    borderRadius: 12,
+    margin: '8px 12px',
+    padding: '0.5rem 0.7rem',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
     display: 'flex',
     alignItems: 'center',
-    gap: '2vw',
+    gap: '1vw',
     position: 'relative',
     minWidth: 0,
-    width: '100%',
+    width: 'calc(100% - 24px)',
+    minHeight: '48px',
+    maxHeight: '56px',
     boxSizing: 'border-box',
   };
   const nameStyles: React.CSSProperties = {
@@ -192,17 +212,18 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
         </div>
   {/* Right panel: list */}
   <div style={{flex: 1, background: 'none', overflowY: 'auto', minHeight: 0, height: '100%'}}>
-          <ul style={listStyles}>
+        <div style={listScreenStyles}>
+          <ul style={listStyles} className="creature-list-scroll">
             {creatures.map((creature) => (
-            <li
-              key={creature.id}
+              <li
+                key={creature.id}
                 style={{
                   ...cardStyles,
                   cursor: 'pointer',
                   background: (hovered && hovered.id === creature.id)
                     ? 'var(--pokedex-bg)' // highlight on hover only
                     : 'var(--pokedex-bg)',
-                  borderColor: 'var(--pokedex-red)',
+                  borderColor: 'var(--pokedex-bg)',
                   transition: 'background 0.2s, border 0.2s, filter 0.2s, transform 0.2s',
                   alignItems: 'center',
                   position: 'relative',
@@ -212,47 +233,48 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
                       : 'scale(1)',
                   zIndex: (selected && selected.id === creature.id) ? 2 : 1,
                 }}
-              onMouseEnter={() => setHovered(creature)}
-              onMouseLeave={() => setHovered(null)}
-              onClick={() => { setSelected(creature); setPopupCreature(creature); }}
-              onDoubleClick={() => setPopupCreature(creature)}
-            >
-              <img
-                src={`http://localhost:8000/api/v1/static/uploads/${creature.image_path.replace(/^.*[\/]/, '')}`}
-                alt={creature.name}
-                style={{
-                  width: 48,
-                  height: 48,
-                  objectFit: 'cover',
-                  borderRadius: '50%',
-                  background: 'var(--pokedex-bg)',
-                  marginRight: 16,
+                onMouseEnter={() => setHovered(creature)}
+                onMouseLeave={() => setHovered(null)}
+                onClick={() => { setSelected(creature); setPopupCreature(creature); }}
+                onDoubleClick={() => setPopupCreature(creature)}
+              >
+                <img
+                  src={`http://localhost:8000/api/v1/static/uploads/${creature.image_path.replace(/^.*[\/]/, '')}`}
+                  alt={creature.name}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    objectFit: 'cover',
+                    borderRadius: '50%',
+                    background: 'var(--pokedex-bg)',
+                    marginRight: 10,
+                    display: 'inline-block',
+                  }}
+                  onError={e => {
+                    (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
+                  }}
+                />
+                <span style={{
+                  fontWeight: 700,
+                  color: 'var(--pokedex-dark-gray)',
+                  fontSize: '1rem',
+                  marginRight: 10,
+                  minWidth: 28,
                   display: 'inline-block',
-                }}
-                onError={e => {
-                  (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
-                }}
-              />
-              <span style={{
-                fontWeight: 700,
-                color: 'var(--pokedex-dark-gray)',
-                fontSize: '1.1rem',
-                marginRight: 16,
-                minWidth: 32,
-                display: 'inline-block',
-                textAlign: 'right',
-              }}>
-                #{creature.id.toString().padStart(3, '0')}
-              </span>
-              <span style={{
-                ...nameStyles,
-                color: 'var(--pokedex-red)',
-                fontSize: '1.3rem',
-                marginLeft: 12,
-              }}>{creature.name}</span>
-            </li>
+                  textAlign: 'right',
+                }}>
+                  #{creature.id.toString().padStart(3, '0')}
+                </span>
+                <span style={{
+                  ...nameStyles,
+                  color: 'var(--pokedex-red)',
+                  fontSize: '1.1rem',
+                  marginLeft: 8,
+                }}>{creature.name}</span>
+              </li>
             ))}
           </ul>
+        </div>
         </div>
       </div>
       {/* Popup for creature details */}
