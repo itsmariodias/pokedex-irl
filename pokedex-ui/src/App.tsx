@@ -22,13 +22,50 @@ function App() {
 
   return (
     <div className="pokedex-outer-bg">
-      <div className="pokedex-16-9">
+      <div className="pokedex-16-9" style={{ position: 'relative' }}>
         <CreatureList ref={listRef} onScanClick={() => setScanOpen(true)} />
         <ScanPopup
           open={scanOpen}
           onClose={() => setScanOpen(false)}
           onScanResult={handleScanResult}
         />
+        {/* Semicircular Scan Button */}
+        <button
+          onClick={() => setScanOpen(true)}
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: '0px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            width: '160px',
+            height: '80px',
+            background: 'var(--pokedex-red)',
+            color: '#fff',
+            border: 'none',
+            borderTopLeftRadius: '80px',
+            borderTopRightRadius: '80px',
+            borderBottomLeftRadius: '0',
+            borderBottomRightRadius: '0',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+            fontWeight: 900,
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            letterSpacing: '2px',
+            paddingTop: '30px',
+            userSelect: 'none',
+            backgroundColor: 'var(--pokedex-black)'
+          }}
+          className="scan-animated scan-semicircle"
+          aria-label="Scan a Creature"
+        >
+          Scan
+        </button>
       </div>
     </div>
   );

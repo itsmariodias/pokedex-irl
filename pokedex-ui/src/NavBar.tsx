@@ -80,25 +80,6 @@ const NavBar: React.FC<{ onScanClick: () => void }> = ({ onScanClick }) => {
         </div>
         <span style={navTitleStyles}>Pokédex IRL</span>
       </div>
-      <button
-        className="scan-animated"
-        style={{
-          background: '#2d2d2d', // softer black
-          color: '#fff',
-          border: 'none',
-          borderRadius: 24,
-          padding: '0.8rem 1.5rem',
-          fontWeight: 700,
-          fontSize: '1.2rem',
-          cursor: 'pointer',
-          boxShadow: '0 2px 16px rgba(0,0,0,0.12)',
-          transition: 'background 0.2s, color 0.2s',
-          marginLeft: 24,
-        }}
-        onClick={onScanClick}
-      >
-        Scan
-      </button>
     </nav>
   );
 };

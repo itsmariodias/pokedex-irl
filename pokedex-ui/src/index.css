@@ -1,3 +1,15 @@
+/* Scan semicircle button animation */
+.scan-semicircle {
+  transition: transform 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s cubic-bezier(.4,0,.2,1);
+}
+.scan-semicircle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+}
+.scan-semicircle:active {
+  transform: scale(0.93);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
 :root {
   font-family: 'Roboto', Arial, Helvetica, sans-serif;
   --pokedex-red: #d32f2f;
@@ -10,6 +22,7 @@
   --pokedex-light-blue: #90caf9;
   --pokedex-gray: #bdbdbd;
   --pokedex-dark-gray: #616161;
+  --pokedex-black: #2d2d2d;
   --pokedex-bg: #f7f7f7;
   --pokedex-screen-bg: #6ea96e;
   line-height: 1.5;
