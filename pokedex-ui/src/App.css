@@ -1,3 +1,10 @@
+/* Hide scrollbars for white container in CreatureList */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
 .logo {
   height: 6em;
   padding: 1.5em;
