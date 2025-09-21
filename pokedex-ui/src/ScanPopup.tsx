@@ -11,6 +11,37 @@ interface ScanPopupProps {
 
 
 const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onScanError }) => {
+  // Inject keyframes for animations
+  useEffect(() => {
+    const styleId = 'scan-popup-animations';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `
+        @keyframes scan-x-hover {
+          0% { transform: scale(1) rotate(0deg); }
+          60% { transform: scale(1.2) rotate(-20deg); }
+          100% { transform: scale(1.1) rotate(-10deg); }
+        }
+        .scan-x-anim:hover {
+          animation: scan-x-hover 0.35s cubic-bezier(.5,1.5,.5,1) forwards;
+        }
+        @keyframes scan-btn-hover {
+          0% { transform: scale(1); }
+          60% { transform: scale(1.08); }
+          100% { transform: scale(1.04); }
+        }
+        .scan-btn-anim:hover {
+          animation: scan-btn-hover 0.25s cubic-bezier(.5,1.5,.5,1) forwards;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    return () => {
+      const style = document.getElementById(styleId);
+      if (style) style.remove();
+    };
+  }, []);
   // Reset image selection
   const handleRetake = () => {
     setImagePreview(null);
@@ -76,7 +107,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
     }
   }, [showCamera]);
 
-  // Capture image from webcam as a perfect circle
+  // Capture image from webcam as a square
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -92,14 +123,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
       const sy = (videoHeight - side) / 2;
       if (context) {
         context.clearRect(0, 0, size, size);
-        context.save();
-        context.beginPath();
-        context.arc(size / 2, size / 2, size / 2, 0, 2 * Math.PI);
-        context.closePath();
-        context.clip();
-        // Draw the cropped square from the video to the canvas
+        // Draw the cropped square from the video to the canvas (no circle clipping)
         context.drawImage(video, sx, sy, side, side, 0, 0, size, size);
-        context.restore();
         canvas.toBlob((blob) => {
           if (blob) {
             const file = new File([blob], 'webcam.png', { type: 'image/png' });
@@ -194,12 +219,13 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
         onClick={e => e.stopPropagation()}
       >
         <button
+          className="scan-x-anim"
           style={{
             position: 'absolute',
             top: 18,
             right: 18,
-              background: 'var(--pokedex-red)',
-              color: 'var(--pokedex-bg)',
+            background: 'var(--pokedex-black)',
+            color: 'var(--pokedex-bg)',
             border: 'none',
             borderRadius: '50%',
             width: 40,
@@ -212,6 +238,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
             boxShadow: '0 2px 6px rgba(0,0,0,0.10)',
             padding: 0,
             lineHeight: 1,
+            transition: 'transform 0.18s',
           }}
           onClick={handleClosePopup}
           aria-label="Close scan popup"
@@ -228,7 +255,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                 style={{
                   width: 180,
                   height: 180,
-                  borderRadius: '50%',
+                  borderRadius: 0,
                   objectFit: 'cover',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
                   background: '#eee',
@@ -259,19 +286,20 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                 style={{
                   width: 180,
                   height: 180,
-                  borderRadius: '50%',
+                  borderRadius: 0,
                   objectFit: 'cover',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                    background: 'var(--pokedex-gray)',
+                  background: 'var(--pokedex-gray)',
                   display: 'block',
                   margin: '0 auto',
                 }}
               />
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
                 <button
+                  className="scan-btn-anim"
                   style={{
-                      background: 'var(--pokedex-green)',
-                      color: '#fff',
+                    background: 'var(--pokedex-green)',
+                    color: '#fff',
                     border: 'none',
                     borderRadius: 20,
                     padding: '0.5rem 1.5rem',
@@ -280,6 +308,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                     cursor: loading ? 'not-allowed' : 'pointer',
                     marginTop: 16,
                     opacity: loading ? 0.7 : 1,
+                    transition: 'background 0.2s, color 0.2s, transform 0.18s',
                   }}
                   onClick={handleAnalyze}
                   disabled={loading}
@@ -287,6 +316,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                   Analyze
                 </button>
                 <button
+                  className="scan-btn-anim"
                   style={{
                       background: 'var(--pokedex-red)',
                       color: '#fff',
@@ -297,6 +327,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                     fontSize: '1.1rem',
                     cursor: 'pointer',
                     marginTop: 8,
+                    transition: 'background 0.2s, color 0.2s, transform 0.18s',
                   }}
                   onClick={handleRetake}
                 >
@@ -308,6 +339,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
             <>
               <label
                 htmlFor="scan-upload-input"
+                className="scan-btn-anim"
                 style={{
                     background: 'var(--pokedex-red)',
                     color: 'var(--pokedex-bg)',
@@ -318,7 +350,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                   fontSize: '1.1rem',
                   cursor: 'pointer',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                  transition: 'background 0.2s, color 0.2s',
+                  transition: 'background 0.2s, color 0.2s, transform 0.18s',
                   marginBottom: 12,
                   display: 'inline-block',
                 }}
@@ -335,6 +367,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
               <span style={{ color: '#888', fontWeight: 500, fontSize: '1rem' }}>or</span>
               {!showCamera && (
                 <button
+                  className="scan-btn-anim"
                   style={{
                       background: 'var(--pokedex-red)',
                       color: 'var(--pokedex-bg)',
@@ -345,7 +378,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                     fontSize: '1.1rem',
                     cursor: 'pointer',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                    transition: 'background 0.2s, color 0.2s',
+                    transition: 'background 0.2s, color 0.2s, transform 0.18s',
                   }}
                   onClick={handleOpenCamera}
                 >
@@ -357,9 +390,9 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                   <div style={{
                     width: 240,
                     height: 240,
-                    borderRadius: '50%',
+                    borderRadius: 0,
                     overflow: 'hidden',
-                      background: 'var(--pokedex-gray)',
+                    background: 'var(--pokedex-gray)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -373,13 +406,14 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                         width: 240,
                         height: 240,
                         objectFit: 'cover',
-                        borderRadius: '50%',
-                          background: 'var(--pokedex-gray)',
+                        borderRadius: 0,
+                        background: 'var(--pokedex-gray)',
                         display: 'block',
                       }}
                     />
                   </div>
                   <button
+                    className="scan-btn-anim"
                     style={{
                         background: 'var(--pokedex-green)',
                         color: '#fff',
@@ -390,6 +424,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                       fontSize: '1.1rem',
                       cursor: 'pointer',
                       marginTop: 8,
+                      transition: 'background 0.2s, color 0.2s, transform 0.18s',
                     }}
                     onClick={handleCapture}
                   >
