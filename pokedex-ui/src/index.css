@@ -134,7 +134,7 @@ button:focus-visible {
   width: 100%;
   height: 100%;
   background: none;
-  /* border: 2px solid #1976D2; */
+  /* border: 2px solid #1565b4; TODO fix */
   border-radius: 6px;
   box-shadow: 0 6px 16px rgba(13,71,161,0.18), -4px -4px 4px rgba(13,71,161,0.18);
   display: flex;
@@ -168,8 +168,13 @@ button:focus-visible {
 
 .pokedex-grid-btn:active .pokedex-grid-btn-inner {
   box-shadow: none;
+  z-index: 0;
 }
 
 .pokedex-grid-btn:active {
   box-shadow: 0 4px 16px rgba(13,71,161,0.18);
+}
+
+.pokedex-grid-btn:active .pokedex-grid-label {
+  transform: translateX(4px) translateY(4px);
 }

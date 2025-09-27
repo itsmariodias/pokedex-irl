@@ -42,7 +42,7 @@ function App() {
             width: '160px',
             height: '80px',
             background: 'var(--pokedex-red)',
-            color: '#fff',
+            color: 'var(--pokedex-bg)',
             border: 'none',
             borderTopLeftRadius: '80px',
             borderTopRightRadius: '80px',

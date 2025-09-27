@@ -32,6 +32,7 @@ router = APIRouter(prefix="/creature", tags=["creature-identification"])
 )
 async def search_creature(
     db_session: DbSession,
+    id: int = None,
     name: str = None,
     scientific_name: str = None,
     kingdom: str = None,
@@ -50,6 +51,7 @@ async def search_creature(
 
     Args:
         db_session: Database session
+        id: Filter by creature ID
         name: Filter by creature name (partial match)
         scientific_name: Filter by scientific name (partial match)
         kingdom: Filter by kingdom (exact match)
@@ -69,6 +71,7 @@ async def search_creature(
 
     creatures = await search_creatures(
         db_session=db_session,
+        id=id,
         name=name,
         scientific_name=scientific_name,
         kingdom=kingdom,

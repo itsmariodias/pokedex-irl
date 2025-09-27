@@ -1,3 +1,4 @@
+import searchIcon from './assets/search.png';
 import React, { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import NavBar from './NavBar';
 import CreatureCard from './CreatureCard';
@@ -90,7 +91,7 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
     border: '3px solid var(--pokedex-black)',
     borderRadius: '18px',
     width: '80%',
-    height: '45%', // top half
+    height: '44%', // top half
     margin: '5% auto 0 auto',
     boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
     display: 'flex',
@@ -465,18 +466,144 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
             height: '25%',
             width: '70%',
           }}>
-            {[...Array(10)].map((_, i) => (
+            {[
+              'ID',
+              'Name',
+              'Sci. Name',
+              'Kingdom',
+              'Class.',
+              'Family',
+              'Body',
+              'Height',
+              'Weight',
+              'Gender'
+            ].map((label, i) => (
               <button
-                key={i}
+                key={label}
                 className="pokedex-grid-btn"
+                style={{ fontFamily: 'inherit', fontWeight: 600, fontSize: '1em', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
                 onClick={() => { }}
               >
-                <div className="pokedex-grid-btn-inner">
-                  {i + 1}
+                <div className="pokedex-grid-btn-inner" style={{ width: '100%', height: '100%', display: 'flex', fontFamily: 'inherit', fontWeight: 600, fontSize: '1em', textAlign: 'center' }}>
+                    <span
+                      style={{
+                        paddingLeft: '0.5rem',
+                        paddingTop: '0.5rem',
+                        position: 'relative',
+                      }}
+                      className="pokedex-grid-label"
+                    >
+                      {label}
+                    </span>
                 </div>
               </button>
             ))}
           </div>
+          {/* Search buttons and text box */}
+            <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            height: '12.5%',
+            marginTop: '2%',
+            marginBottom: '5%',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            width: '70%',
+            }}>
+            <div 
+              style={{ 
+              position: 'relative', 
+              flex: 1, 
+              width: '100%',
+              display: 'flex', 
+              alignItems: 'center', 
+              height: 'auto', 
+              gap: '5%',
+              justifyContent: 'flex-start',
+              }}>
+              <label
+              htmlFor="search-input"
+              style={{
+                background: 'var(--pokedex-black)',
+                border: '3px solid var(--pokedex-black)',
+                borderRadius: '18px',
+                height: '3.5rem',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center', 
+                alignItems: 'flex-start',
+                overflow: 'hidden',
+                position: 'relative',
+                paddingLeft: '1.2rem',
+                paddingRight: '1.2rem',
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                color: 'var(--pokedex-bg)',
+                width: '30%',
+              }}
+              >
+              Hello
+              </label>
+              <input
+              type="text"
+              placeholder="Search"
+              style={{
+                background: 'var(--pokedex-black)',
+                border: '3px solid var(--pokedex-black)',
+                borderRadius: '18px',
+                height: '3.5rem',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                overflow: 'hidden',
+                position: 'relative',
+                paddingLeft: '1.2rem',
+                paddingRight: '1.2rem',
+                outline: 'none', // Prevent blue highlight
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                color: 'var(--pokedex-bg)',
+                width: '30%',
+              }}
+              onFocus={e => e.target.style.outline = 'none'}
+              onBlur={e => e.target.style.outline = 'none'}
+              onChange={() => { }}
+              />
+            </div>
+            <button
+              className="pokedex-search-btn scan-animated"
+              style={{
+                width: '3.5em',
+                height: '3.5em',
+                minWidth: '2.5em',
+                minHeight: '2.5em',
+                borderRadius: '50%',
+                border: '5px solid var(--pokedex-yellow)',
+                background: 'var(--pokedex-yellow)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                cursor: 'pointer',
+                padding: 0,
+                marginLeft: '2rem',
+              }}
+              onClick={() => { }}
+              title="Search"
+            >
+                <img
+                  src={searchIcon}
+                  alt="Search"
+                  style={{ width: 28, height: 28, objectFit: 'contain'}}
+                  onError={e => { (e.target as HTMLImageElement).src = searchIcon; }}
+                />
+            </button>
+            </div>
         </div>
       </div>
     </div>

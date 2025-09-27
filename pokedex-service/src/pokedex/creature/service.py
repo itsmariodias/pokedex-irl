@@ -211,6 +211,7 @@ async def identify_from_image(
 
 async def search_creatures(
     db_session: Session,
+    id: int = None,
     name: str = None,
     scientific_name: str = None,
     kingdom: str = None,
@@ -229,6 +230,7 @@ async def search_creatures(
 
     Args:
         db_session (Session): Database session
+        id (int, optional): Filter by creature ID
         name (str, optional): Filter by name
         scientific_name (str, optional): Filter by scientific name
         kingdom (str, optional): Filter by kingdom
@@ -249,6 +251,8 @@ async def search_creatures(
     query = db_session.query(Creature)
     filters = []
 
+    if id is not None:
+        filters.append(Creature.id == id)
     if name:
         filters.append(Creature.name.ilike(f"%{name}%"))
     if scientific_name:
