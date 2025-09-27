@@ -40,3 +40,54 @@
 .read-the-docs {
   color: #888;
 }
+
+/* CRT-like reveal when an image appears on the screen */
+.crt-wipe {
+  animation: crtWipe 0.7s cubic-bezier(.5,1.5,.5,1) both;
+}
+
+@keyframes crtWipe {
+  0% { clip-path: inset(100% 0 0 0); opacity: 0.7; }
+  60% { opacity: 1; }
+  100% { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+/* Subtle pulse/glow for scan buttons (applies in addition to the transform rules injected by NavBar) */
+@keyframes scanPulse {
+  0% { box-shadow: 0 2px 8px rgba(0,0,0,0.10); transform: translateZ(0); }
+  50% { box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+  100% { box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
+}
+
+.scan-animated {
+  will-change: transform, box-shadow;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scan-animated:hover {
+    animation: scanPulse 700ms ease-in-out;
+  }
+}
+
+  /* Navbar LED styles: flashing (during analyze) and steady-on (when details selected) */
+  @keyframes ledFlash {
+    0% { box-shadow: 0 0 6px rgba(33,150,243,0.0), 0 0 0 rgba(33,150,243,0.0); }
+    40% { box-shadow: 0 0 20px rgba(33,150,243,0.85), 0 0 40px rgba(33,150,243,0.25); }
+    100% { box-shadow: 0 0 6px rgba(33,150,243,0.0), 0 0 0 rgba(33,150,243,0.0); }
+  }
+
+  .pokedex-led {
+    transition: box-shadow 220ms ease, transform 160ms ease;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pokedex-led.led-flash {
+      animation: ledFlash 1000ms ease-in-out infinite;
+    }
+  }
+
+  .pokedex-led.led-on {
+    box-shadow: 0 0 18px rgba(33,150,243,0.95), 0 0 36px rgba(33,150,243,0.28);
+  }
+
+

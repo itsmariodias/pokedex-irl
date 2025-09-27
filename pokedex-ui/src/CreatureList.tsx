@@ -1,5 +1,6 @@
 import searchIcon from './assets/search.png';
-import React, { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useState, useImperativeHandle, forwardRef, useRef } from 'react';
+import spinner from './assets/spinner.gif';
 import NavBar from './NavBar';
 
 // Define the Creature type based on your FastAPI CreaturePublic schema
@@ -8,71 +9,51 @@ export interface Creature {
   name: string;
   scientific_name: string;
   description: string;
-  gender_ratio: number;
-  kingdom: string;
-  classification: string;
-  family: string;
-  height: number;
-  weight: number;
-  body_shape: string;
-  image_path: string;
 }
 
-const API_URL = 'http://localhost:8000/api/v1/creature/'; // Adjust if your FastAPI endpoint differs
-
-export interface CreatureListHandle {
-  refresh: () => void;
-  showCreature: (creature: Creature) => void;
+// Extended fields present on CreaturePublic from the backend
+export interface Creature {
+  kingdom?: string;
+  classification?: string;
+  family?: string;
+  body_shape?: string;
+  image_path?: string;
+  gender_ratio?: number;
+  height?: number;
+  weight?: number;
 }
 
+// Backend API base for creature endpoints
+const API_URL = 'http://localhost:8000/api/v1/creature/';
 
-const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>((props, ref) => {
-  // Typewriter hook for parallel fields
-  function useTypewriter(text: string, speed = 18) {
-    const [display, setDisplay] = useState('');
-    useEffect(() => {
-      let i = 0;
-      setDisplay('');
-      if (!text) return;
-      const interval = setInterval(() => {
-        i++;
-        setDisplay(text.slice(0, i));
-        if (i >= text.length) clearInterval(interval);
-      }, speed);
-      return () => clearInterval(interval);
-    }, [text, speed, text === undefined]);
-    return display;
-  }
-  // Inject keyframes for left pane animations
+// Small typewriter hook used for animated text; keeps it simple and fast
+function useTypewriter(text: string, speed = 20) {
+  const [out, setOut] = useState('');
   useEffect(() => {
-    const styleId = 'creature-list-animations';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.innerHTML = `
-        @keyframes fadeInText {
-          0% { opacity: 0; transform: translateY(12px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .creature-details-anim {
-          animation: fadeInText 0.6s cubic-bezier(.5,1.5,.5,1) both;
-        }
-        @keyframes crtWipe {
-          0% { clip-path: inset(100% 0 0 0); opacity: 0.7; }
-          60% { opacity: 1; }
-          100% { clip-path: inset(0 0 0 0); opacity: 1; }
-        }
-        .crt-wipe {
-          animation: crtWipe 0.7s cubic-bezier(.5,1.5,.5,1) both;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-    return () => {
-      const style = document.getElementById(styleId);
-      if (style) style.remove();
-    };
-  }, []);
+    let i = 0;
+    setOut('');
+    if (!text) return;
+    const id = setInterval(() => {
+      i += 1;
+      setOut(text.slice(0, i));
+      if (i >= text.length) clearInterval(id);
+    }, speed);
+    return () => clearInterval(id);
+  }, [text, speed]);
+  return out;
+}
+
+export type CreatureListHandle = {
+  refresh: () => void;
+  showScan: (open: boolean) => void;
+  showCreature: (c: Creature) => void;
+};
+
+type CreatureListProps = {
+  onScanModeChange?: (open: boolean) => void;
+};
+
+const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScanModeChange }, ref) => {
   // Pokedex-inspired styles
   const pokedexStyles: React.CSSProperties = {
     background: 'linear-gradient(135deg, var(--pokedex-red) 0%, var(--pokedex-dark-red) 100%)',
@@ -149,6 +130,18 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
   const [searchParams, setSearchParams] = useState<Record<string, string>>({});
   // For range fields store separate min/max values
   const [searchRangeParams, setSearchRangeParams] = useState<Record<string, { min?: string; max?: string }>>({});
+
+  // Scan mode state: when true, left pane shows upload controls in white box and webcam/image in the green screen
+  const [scanMode, setScanMode] = useState(false);
+  const [scanShowCamera, setScanShowCamera] = useState(false);
+  const [scanImagePreview, setScanImagePreview] = useState<string | null>(null);
+  const [scanImageFile, setScanImageFile] = useState<File | null>(null);
+  const [scanImageReady, setScanImageReady] = useState(false);
+  const [scanAnalyzing, setScanAnalyzing] = useState(false);
+  const scanVideoRef = useRef<HTMLVideoElement | null>(null);
+  const scanCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  // refs for list items so we can scroll newly added creature into view
+  const itemRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
   // Range field helpers: which UI labels represent ranges and derived active min/max
   const rangeFields: string[] = ['Height', 'Weight', 'Gender Ratio'];
@@ -355,27 +348,48 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
               overflow: 'hidden',
             }}
           >
-            {(selected || hovered) ? (
-              <img
-                key={selected ? selected.id : hovered?.id}
-                src={`http://localhost:8000/api/v1/static/uploads/${((selected || hovered)?.image_path ?? '').replace(/^.*[\\\/]/, '')}`}
-                alt={(selected || hovered)?.name ?? ''}
-                className="crt-wipe"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  borderRadius: '0',
-                  background: 'transparent',
-                  display: 'block',
-                }}
-                onError={e => {
-                  (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
-                }}
-              />
-            ) : (
-              <div style={{ color: 'rgb(51, 51, 51)', fontSize: '1.2rem' }}></div>
-            )}
+            {scanMode ? (
+              // Scan mode: show camera or uploaded preview inside the green screen
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {scanShowCamera ? (
+                  <video
+                    ref={scanVideoRef}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    playsInline
+                    muted
+                  />
+                ) : (scanImagePreview ? (
+                  <img
+                    src={scanImagePreview}
+                    alt="Scan preview"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div style={{ color: 'rgb(51, 51, 51)', fontSize: '1.0rem' }}></div>
+                ))}
+                <canvas ref={scanCanvasRef} width={240} height={240} style={{ display: 'none' }} />
+              </div>
+            ) : ((selected || hovered) ? (
+                <img
+                  key={selected ? selected.id : hovered?.id}
+                  src={`http://localhost:8000/api/v1/static/uploads/${((selected || hovered)?.image_path ?? '').replace(/^.*[\\\/]/, '')}`}
+                  alt={(selected || hovered)?.name ?? ''}
+                  className="crt-wipe"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '0',
+                    background: 'transparent',
+                    display: 'block',
+                  }}
+                  onError={e => {
+                    (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
+                  }}
+                />
+              ) : (
+                <div style={{ color: 'rgb(51, 51, 51)', fontSize: '1.2rem' }}></div>
+              ))}
           </div>
         </div>
         <div
@@ -388,7 +402,7 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
             boxSizing: 'border-box',
             boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
             display: 'flex',
-            alignItems: 'flex-start',
+            alignItems: scanMode ? 'center' : 'flex-start',
             justifyContent: 'center',
             position: 'relative',
             border: '1px solid var(--pokedex-gray)',
@@ -400,77 +414,210 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
           }}
           className="hide-scrollbar"
         >
-          {selected && (
-            <div className="creature-details-anim" style={{ width: '100%', display: 'flex', flexDirection: 'row', gap: '1.2rem', alignItems: 'flex-start', justifyContent: 'center' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'row', gap: '1.2rem' }}>
-                <div style={{ flex: 1 }}>
-                  <h2 style={{ margin: '0 0 0.15rem 0', color: 'var(--pokedex-black)', fontWeight: 900, fontSize: '1.08rem', letterSpacing: '0.01em' }}>{nameTyped}</h2>
-                  <h4 style={{ margin: '0 0 0.4rem 0', color: '#616161', fontWeight: 500, fontStyle: 'italic', fontSize: '0.92rem', letterSpacing: '0.01em' }}>{sciNameTyped}</h4>
-                  <p style={{ margin: '0 0 0.4rem 0', color: '#333', fontSize: '0.88rem', textAlign: 'left', lineHeight: 1.3 }}>{descTyped}</p>
+          {scanMode ? (
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              {scanAnalyzing && (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.85)', zIndex: 80, fontWeight: 800 }}>
+                  <img src={spinner} alt="Analyzing" style={{ width: 72, height: 72, objectFit: 'contain' }} />
+                  <div style={{ marginTop: 8, color: '#333', fontWeight: 800 }}>Analyzing...</div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <table style={{ width: '100%', fontSize: '0.88rem', color: '#444', marginBottom: 0, borderSpacing: 0 }}>
-                    <tbody>
-                      <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Kingdom:</td><td style={{ padding: '0.15rem 0' }}>{kingdomTyped}</td></tr>
-                      <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Classification:</td><td style={{ padding: '0.15rem 0' }}>{classTyped}</td></tr>
-                      <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Family:</td><td style={{ padding: '0.15rem 0' }}>{familyTyped}</td></tr>
-                      <tr>
-                        <td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Body Shape:</td>
-                        <td style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.15rem 0' }}>
-                          {(() => {
-                            const match = /bsi:(.+)/.exec(selected.body_shape);
-                            const key = match ? match[1] : selected.body_shape;
-                            const icons = import.meta.glob('./assets/body_shape_icons/*.png', { eager: true, import: 'default' });
-                            const iconPath = key ? `./assets/body_shape_icons/${key}.png` : null;
-                            const iconSrc = iconPath && icons[iconPath] ? icons[iconPath] : null;
-                            return (
-                              <>
-                                {iconSrc && (
-                                  <img
-                                    src={iconSrc as string}
-                                    alt={key}
-                                    style={{ width: 18, height: 18, objectFit: 'contain', verticalAlign: 'middle' }}
-                                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                  />
-                                )}
-                              </>
-                            );
-                          })()}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', verticalAlign: 'top', whiteSpace: 'nowrap' }}>Gender Ratio:</td>
-                        <td style={{ padding: '0.15rem 0' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <span style={{ fontSize: '0.95em', color: '#2196f3', fontWeight: 700, minWidth: 16, textAlign: 'right' }}>♂️</span>
-                            <div style={{ width: 60, height: 8, borderRadius: 4, overflow: 'hidden', display: 'flex', boxShadow: '0 1px 4px #eee', border: '1px solid #e0e0e0' }} title={`♂️:♀️ = ${selected.gender_ratio}:1`}>
-                              {(() => {
-                                const ratio = Math.max(0, selected.gender_ratio) / 2;
-                                const total = 1;
-                                const malePercent = (ratio / total) * 100;
-                                const femalePercent = (1 - ratio / total) * 100;
-                                return <>
-                                  <div style={{ width: `${malePercent}%`, background: 'linear-gradient(90deg, #2196f3 70%, #90caf9 100%)', height: '100%' }}></div>
-                                  <div style={{ width: `${femalePercent}%`, background: 'linear-gradient(90deg, #f06292 70%, #f8bbd0 100%)', height: '100%' }}></div>
-                                </>;
-                              })()}
-                            </div>
-                            <span style={{ fontSize: '0.95em', color: '#f06292', fontWeight: 700, minWidth: 16, textAlign: 'left' }}>♀️</span>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Height:</td><td style={{ padding: '0.15rem 0' }}>{heightTyped}</td></tr>
-                      <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Weight:</td><td style={{ padding: '0.15rem 0' }}>{weightTyped}</td></tr>
-                    </tbody>
-                  </table>
+              )}
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', width: '60%' }}>
+                  {!scanImageReady && (
+                    <>
+                      {!scanShowCamera ? (
+                        <>
+                          <label className="scan-animated" style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '3.5rem',
+                            width: '50%',
+                            background: 'var(--pokedex-red)',
+                            color: 'var(--pokedex-bg)',
+                            borderRadius: '18px',
+                            fontWeight: 800,
+                            fontSize: '1rem',
+                            cursor: scanAnalyzing ? 'not-allowed' : 'pointer',
+                            opacity: scanAnalyzing ? 0.6 : 1,
+                            boxSizing: 'border-box',
+                            padding: '0 1.2rem'
+                          }}>
+                            Upload
+                            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleScanFileChange} disabled={scanAnalyzing} />
+                          </label>
+                          <button className="scan-animated" onClick={() => handleScanOpenCamera()} style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '3.5rem',
+                            width: '50%',
+                            background: 'var(--pokedex-red)',
+                            color: 'var(--pokedex-bg)',
+                            borderRadius: '18px',
+                            padding: '0 1.2rem',
+                            fontWeight: 800,
+                            fontSize: '1rem',
+                            border: 'none',
+                            cursor: scanAnalyzing ? 'not-allowed' : 'pointer',
+                            opacity: scanAnalyzing ? 0.6 : 1,
+                            boxSizing: 'border-box'
+                          }} disabled={scanAnalyzing}>Webcam</button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="scan-animated" onClick={() => handleScanCapture()} style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '3.5rem',
+                            width: '50%',
+                            background: 'var(--pokedex-green)',
+                            color: '#fff',
+                            borderRadius: '18px',
+                            padding: '0 1.2rem',
+                            fontWeight: 800,
+                            fontSize: '1rem',
+                            border: 'none',
+                            cursor: scanAnalyzing ? 'not-allowed' : 'pointer',
+                            opacity: scanAnalyzing ? 0.6 : 1,
+                            boxSizing: 'border-box'
+                          }} disabled={scanAnalyzing}>Capture</button>
+                          <button className="scan-animated" onClick={() => handleScanCancel()} style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '3.5rem',
+                            width: '50%',
+                            background: '#9e9e9e',
+                            color: '#fff',
+                            borderRadius: '18px',
+                            padding: '0 1.2rem',
+                            fontWeight: 800,
+                            fontSize: '1rem',
+                            border: 'none',
+                            cursor: 'pointer',
+                            boxSizing: 'border-box'
+                          }}>Cancel</button>
+                        </>
+                      )}
+                    </>
+                  )}
+                  {scanImageReady && (
+                    <>
+                      <button className="scan-animated" onClick={() => handleScanAnalyze()} style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '3.5rem',
+                        width: '50%',
+                        background: 'var(--pokedex-green)',
+                        color: '#fff',
+                        borderRadius: '18px',
+                        padding: '0 1.2rem',
+                        fontWeight: 800,
+                        fontSize: '1rem',
+                        border: 'none',
+                        cursor: scanAnalyzing ? 'not-allowed' : 'pointer',
+                        opacity: scanAnalyzing ? 0.6 : 1,
+                        boxSizing: 'border-box'
+                      }} disabled={scanAnalyzing}>Analyze</button>
+                      <button className="scan-animated" onClick={() => handleScanRetake()} style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '3.5rem',
+                        width: '50%',
+                        background: 'var(--pokedex-red)',
+                        color: 'var(--pokedex-bg)',
+                        borderRadius: '18px',
+                        padding: '0 1.2rem',
+                        fontWeight: 800,
+                        fontSize: '1rem',
+                        border: 'none',
+                        cursor: scanAnalyzing ? 'not-allowed' : 'pointer',
+                        opacity: scanAnalyzing ? 0.6 : 1,
+                        boxSizing: 'border-box'
+                      }} disabled={scanAnalyzing}>Retake</button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
+          ) : (
+            selected && (
+              <div className="creature-details-anim" style={{ width: '100%', display: 'flex', flexDirection: 'row', gap: '1.2rem', alignItems: 'flex-start', justifyContent: 'center' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'row', gap: '1.2rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <h2 style={{ margin: '0 0 0.15rem 0', color: 'var(--pokedex-black)', fontWeight: 900, fontSize: '1.08rem', letterSpacing: '0.01em' }}>{nameTyped}</h2>
+                    <h4 style={{ margin: '0 0 0.4rem 0', color: '#616161', fontWeight: 500, fontStyle: 'italic', fontSize: '0.92rem', letterSpacing: '0.01em' }}>{sciNameTyped}</h4>
+                    <p style={{ margin: '0 0 0.4rem 0', color: '#333', fontSize: '0.88rem', textAlign: 'left', lineHeight: 1.3 }}>{descTyped}</p>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <table style={{ width: '100%', fontSize: '0.88rem', color: '#444', marginBottom: 0, borderSpacing: 0 }}>
+                      <tbody>
+                        <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Kingdom:</td><td style={{ padding: '0.15rem 0' }}>{kingdomTyped}</td></tr>
+                        <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Classification:</td><td style={{ padding: '0.15rem 0' }}>{classTyped}</td></tr>
+                        <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Family:</td><td style={{ padding: '0.15rem 0' }}>{familyTyped}</td></tr>
+                        <tr>
+                          <td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Body Shape:</td>
+                          <td style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.15rem 0' }}>
+                            {(() => {
+                              const match = /bsi:(.+)/.exec(selected?.body_shape ?? '');
+                              const key = match ? match[1] : (selected?.body_shape ?? '');
+                              const icons = import.meta.glob('./assets/body_shape_icons/*.png', { eager: true, import: 'default' });
+                              const iconPath = key ? `./assets/body_shape_icons/${key}.png` : null;
+                              const iconSrc = iconPath && icons[iconPath] ? icons[iconPath] : null;
+                              return (
+                                <>
+                                  {iconSrc && (
+                                    <img
+                                      src={iconSrc as string}
+                                      alt={key}
+                                      style={{ width: 18, height: 18, objectFit: 'contain', verticalAlign: 'middle' }}
+                                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                    />
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', verticalAlign: 'top', whiteSpace: 'nowrap' }}>Gender Ratio:</td>
+                          <td style={{ padding: '0.15rem 0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <span style={{ fontSize: '0.95em', color: '#2196f3', fontWeight: 700, minWidth: 16, textAlign: 'right' }}>♂️</span>
+                              <div style={{ width: 60, height: 8, borderRadius: 4, overflow: 'hidden', display: 'flex', boxShadow: '0 1px 4px #eee', border: '1px solid #e0e0e0' }} title={`♂️:♀️ = ${selected.gender_ratio}:1`}>
+                                {(() => {
+                                  const ratio = Math.max(0, selected?.gender_ratio ?? 0) / 2;
+                                  const total = 1;
+                                  const malePercent = (ratio / total) * 100;
+                                  const femalePercent = (1 - ratio / total) * 100;
+                                  return <>
+                                    <div style={{ width: `${malePercent}%`, background: 'linear-gradient(90deg, #2196f3 70%, #90caf9 100%)', height: '100%' }}></div>
+                                    <div style={{ width: `${femalePercent}%`, background: 'linear-gradient(90deg, #f06292 70%, #f8bbd0 100%)', height: '100%' }}></div>
+                                  </>;
+                                })()}
+                              </div>
+                              <span style={{ fontSize: '0.95em', color: '#f06292', fontWeight: 700, minWidth: 16, textAlign: 'left' }}>♀️</span>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Height:</td><td style={{ padding: '0.15rem 0' }}>{heightTyped}</td></tr>
+                        <tr><td style={{ fontWeight: 600, padding: '0.15rem 0.3rem 0.15rem 0', whiteSpace: 'nowrap' }}>Weight:</td><td style={{ padding: '0.15rem 0' }}>{weightTyped}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )
           )}
         </div>
       </div>
     );
-  }, [selected, hovered, nameTyped, sciNameTyped, descTyped, kingdomTyped, classTyped, familyTyped, heightTyped, weightTyped]);
+  }, [selected, hovered, nameTyped, sciNameTyped, descTyped, kingdomTyped, classTyped, familyTyped, heightTyped, weightTyped, scanMode, scanShowCamera, scanImagePreview, scanImageReady, scanAnalyzing]);
 
   useImperativeHandle(ref, () => ({
     refresh: () => {
@@ -491,7 +638,24 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
         });
     },
   showCreature: (_creature: Creature) => { /* no-op: popup/modal not implemented */ },
+  showScan: (open: boolean) => { setScanMode(open); },
   }));
+
+  // Whenever scanMode is deactivated, reset all scan UI state so buttons return to initial state
+  useEffect(() => {
+    if (!scanMode) {
+      // stop any active camera stream
+      if (scanVideoRef.current && (scanVideoRef.current.srcObject as MediaStream | null)) {
+        (scanVideoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
+        scanVideoRef.current.srcObject = null;
+      }
+      setScanShowCamera(false);
+      setScanImagePreview(null);
+      setScanImageFile(null);
+      setScanImageReady(false);
+      setScanAnalyzing(false);
+    }
+  }, [scanMode]);
 
   // Handler to reset left pane when clicking outside
   useEffect(() => {
@@ -505,12 +669,163 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  // --- Scan helpers (mirrors behavior previously in ScanPopup but embedded into left pane) ---
+  // Open webcam
+  function handleScanOpenCamera() {
+    setScanShowCamera(true);
+    setScanImagePreview(null);
+    setScanImageReady(false);
+  }
+
+  // Handle file upload for scan
+  function handleScanFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setScanImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setScanImagePreview(ev.target?.result as string);
+        setScanShowCamera(false);
+        setScanImageReady(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Capture from webcam
+  function handleScanCapture() {
+    const video = scanVideoRef.current;
+    const canvas = scanCanvasRef.current;
+    if (video && canvas) {
+      const ctx = canvas.getContext('2d');
+      const size = 240;
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      const side = Math.min(vw, vh);
+      const sx = (vw - side) / 2;
+      const sy = (vh - side) / 2;
+      if (ctx) {
+        ctx.clearRect(0, 0, size, size);
+        ctx.drawImage(video, sx, sy, side, side, 0, 0, size, size);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], 'webcam.png', { type: 'image/png' });
+            setScanImageFile(file);
+            setScanImagePreview(canvas.toDataURL('image/png'));
+            setScanImageReady(true);
+          }
+        }, 'image/png');
+      }
+    }
+    // stop stream if any
+    if (scanVideoRef.current && (scanVideoRef.current.srcObject as MediaStream | null)) {
+      (scanVideoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
+    }
+    setScanShowCamera(false);
+  }
+
+  // Cancel webcam mode and stop stream
+  function handleScanCancel() {
+    if (scanVideoRef.current && (scanVideoRef.current.srcObject as MediaStream | null)) {
+      (scanVideoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
+      scanVideoRef.current.srcObject = null;
+    }
+    setScanShowCamera(false);
+    // keep any existing preview cleared
+    setScanImagePreview(null);
+    setScanImageFile(null);
+    setScanImageReady(false);
+  }
+
+  // Analyze/identify the image via backend endpoint
+  async function handleScanAnalyze() {
+    if (!scanImageFile) return;
+    setScanAnalyzing(true);
+    setLoading(true);
+    setError(null);
+    try {
+      const fd = new FormData();
+      fd.append('image', scanImageFile);
+      const res = await fetch('http://localhost:8000/api/v1/creature/identify', {
+        method: 'POST',
+        body: fd,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Failed to identify creature');
+      }
+      const creature = await res.json();
+      setScanAnalyzing(false);
+      setScanImagePreview(null);
+      setScanImageFile(null);
+      setScanImageReady(false);
+      setScanMode(false);
+      setSelected(creature);
+      // Refetch the creature list so newly identified creature is present
+      try {
+        const listRes = await fetch(API_URL);
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          setCreatures(listData);
+          // attempt to scroll the newly identified creature into view
+          setTimeout(() => {
+            const el = itemRefs.current[creature.id];
+            if (el && typeof el.scrollIntoView === 'function') {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 120);
+        }
+      } catch (e) {
+        // non-fatal - keep selected creature shown
+        console.warn('Failed to refetch creatures after identify', e);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleScanRetake() {
+    setScanImagePreview(null);
+    setScanImageFile(null);
+    setScanImageReady(false);
+    setScanShowCamera(false);
+  }
+  useEffect(() => {
+    let mounted = true;
+    let stream: MediaStream | undefined;
+    if (scanShowCamera) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(s => {
+          if (!mounted) return;
+          stream = s;
+          if (scanVideoRef.current) {
+            scanVideoRef.current.srcObject = stream;
+            scanVideoRef.current.play().catch(() => {});
+          }
+        })
+        .catch(() => {
+          alert('Could not access webcam.');
+          setScanShowCamera(false);
+        });
+    }
+    return () => {
+      mounted = false;
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    };
+  }, [scanShowCamera]);
+
+  // Notify parent when scan mode changes
+  useEffect(() => {
+    if (onScanModeChange) onScanModeChange(scanMode);
+  }, [scanMode, onScanModeChange]);
 
   // ...existing code...
 
   return (
     <div style={pokedexStyles}>
-      <NavBar onScanClick={props.onScanClick} />
+  <NavBar isAnalyzing={scanAnalyzing} hasDetails={!!selected} />
       <div style={{
         display: 'flex',
         flex: 1,
@@ -563,6 +878,7 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
             <ul style={listStyles} className="creature-list-scroll">
               {creatures.map((creature) => (
                 <li
+                  ref={el => { itemRefs.current[creature.id] = el; }}
                   key={creature.id}
                   style={{
                     ...cardStyles,
@@ -582,10 +898,10 @@ const CreatureList = forwardRef<CreatureListHandle, { onScanClick: () => void }>
                   }}
                   onMouseEnter={() => setHovered(creature)}
                   onMouseLeave={() => setHovered(null)}
-                  onClick={() => { setSelected(creature); }}
+                  onClick={() => { setSelected(creature); setScanMode(false); }}
                 >
                   <img
-                    src={`http://localhost:8000/api/v1/static/uploads/${creature.image_path.replace(/^.*[\/]/, '')}`}
+                    src={`http://localhost:8000/api/v1/static/uploads/${(creature.image_path ?? 'placeholder.png').replace(/^.*[\\\/]/, '')}`}
                     alt={creature.name}
                     style={{
                       width: 36,

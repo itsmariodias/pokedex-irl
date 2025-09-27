@@ -70,7 +70,12 @@ const smallCircle = (color: string) => ({
   boxShadow: '0 0 4px ' + color,
 });
 
-const NavBar: React.FC<{ onScanClick: () => void }> = ({ onScanClick }) => {
+type NavBarProps = {
+  isAnalyzing?: boolean;
+  hasDetails?: boolean;
+};
+
+const NavBar: React.FC<NavBarProps> = ({ isAnalyzing = false, hasDetails = false }) => {
   // Add keyframes for pulse animation
   React.useEffect(() => {
     const style = document.createElement('style');
@@ -92,7 +97,7 @@ const NavBar: React.FC<{ onScanClick: () => void }> = ({ onScanClick }) => {
   return (
     <nav style={navStyles}>
       <div style={navLeftStyles}>
-        <div style={ledStyles}></div>
+  <div style={ledStyles} className={`pokedex-led ${isAnalyzing ? 'led-flash' : ''} ${hasDetails ? 'led-on' : ''}`}></div>
         <div style={{ display: 'flex', alignItems: 'center', marginRight: 8 }}>
           <div style={smallCircle('radial-gradient(circle at 30% 30%, var(--pokedex-red) 70%, var(--pokedex-dark-red) 100%)')}></div>
           <div style={smallCircle('radial-gradient(circle at 30% 30%, var(--pokedex-yellow) 70%, var(--pokedex-dark-yellow) 100%)')}></div>

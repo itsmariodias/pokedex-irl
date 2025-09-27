@@ -4,34 +4,27 @@
 import './App.css';
 import { useRef, useState } from 'react';
 import CreatureList from './CreatureList';
-import type { CreatureListHandle, Creature } from './CreatureList';
-import ScanPopup from './ScanPopup';
+import type { CreatureListHandle } from './CreatureList';
 
 
 function App() {
   const listRef = useRef<CreatureListHandle>(null);
   const [scanOpen, setScanOpen] = useState(false);
-
-  const handleScanResult = (creature: Creature) => {
-    if (listRef.current) {
-      listRef.current.refresh();
-      listRef.current.showCreature(creature);
-    }
-    setScanOpen(false);
-  };
+  // Use the CreatureList imperative handle to open the embedded scan UI
 
   return (
     <div className="pokedex-outer-bg">
       <div className="pokedex-16-9" style={{ position: 'relative' }}>
-        <CreatureList ref={listRef} onScanClick={() => setScanOpen(true)} />
-        <ScanPopup
-          open={scanOpen}
-          onClose={() => setScanOpen(false)}
-          onScanResult={handleScanResult}
-        />
+  <CreatureList ref={listRef} onScanModeChange={(open) => setScanOpen(open)} />
         {/* Semicircular Scan Button */}
         <button
-          onClick={() => setScanOpen(true)}
+          onClick={() => {
+            if (scanOpen) {
+              listRef.current && listRef.current.showScan(false);
+            } else {
+              listRef.current && listRef.current.showScan(true);
+            }
+          }}
           style={{
             position: 'absolute',
             left: 0,
@@ -64,7 +57,7 @@ function App() {
           className="scan-animated scan-semicircle"
           aria-label="Scan a Creature"
         >
-          Scan
+          {scanOpen ? 'Cancel' : 'Scan'}
         </button>
       </div>
     </div>
