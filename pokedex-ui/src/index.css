@@ -152,6 +152,28 @@ button:focus-visible {
   padding: 0px;
 }
 
+.pokedex-grid-btn-pressed {
+  width: 100%;
+  height: 100%;
+  background: none;
+  /* border: 2px solid #1565b4; TODO fix */
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(13,71,161,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #0D47A1;
+  cursor: pointer;
+  transition: none;
+  outline: none;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+  padding: 0px;
+}
+
 .pokedex-grid-btn-inner {
   background: #4FC3F7;
   position: relative;
@@ -166,6 +188,20 @@ button:focus-visible {
   text-align: center;
 }
 
+.pokedex-grid-btn-inner-pressed {
+  background: #4FC3F7;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  box-shadow: none;
+  z-index: 0;
+  text-align: center;
+}
+
 .pokedex-grid-btn:active .pokedex-grid-btn-inner {
   box-shadow: none;
   z-index: 0;
@@ -176,5 +212,9 @@ button:focus-visible {
 }
 
 .pokedex-grid-btn:active .pokedex-grid-label {
+  transform: translateX(4px) translateY(4px);
+}
+
+.pokedex-grid-label-pressed {
   transform: translateX(4px) translateY(4px);
 }
