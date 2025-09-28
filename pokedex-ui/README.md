@@ -51,7 +51,7 @@ pokedex-ui/
 │   ├── CreatureCard.tsx   # Creature detail card
 │   ├── ScanPopup.tsx      # Scan popup/modal
 │   ├── assets/            # Images and icons
-│   │   ├── spinner.gif
+│   │   ├── spinner.svg    # Loading spinner
 │   │   └── body_shape_icons/
 │   │       ├── bipedal.png
 │   │       ├── quadruped.png

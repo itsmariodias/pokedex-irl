@@ -1,6 +1,6 @@
 import searchIcon from './assets/search.png';
 import React, { useEffect, useState, useImperativeHandle, forwardRef, useRef } from 'react';
-import spinner from './assets/spinner.gif';
+import spinner from './assets/spinner.svg';
 import NavBar from './NavBar';
 
 // Define the Creature type based on your FastAPI CreaturePublic schema

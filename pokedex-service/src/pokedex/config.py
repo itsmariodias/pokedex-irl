@@ -1,6 +1,7 @@
 from functools import lru_cache
 import os
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,13 +22,12 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{os.path.abspath(os.path.join(os.path.dirname(__file__), '../../pokedex.db'))}"
     static_dir: str = "/static"
     upload_dir: str = "/uploads"
-    default_model: str = "qwen-3-local"
-    model_name: str
-    model_api_key: str
+    model_name: str = "qwen-3-local"
+    model_api_key: SecretStr
     model_endpoint: str
-    image_model_name: str
+    image_model_name: str = "gemma-3-local"
     image_model_endpoint: str
-    image_model_api_key: str
+    image_model_api_key: SecretStr
 
 
 @lru_cache

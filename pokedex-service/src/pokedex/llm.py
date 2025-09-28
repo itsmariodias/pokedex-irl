@@ -5,8 +5,6 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
-from pokedex.config import settings
-
 
 class ModelName(Enum):
     GPT_4O = "gpt-4o"
@@ -16,10 +14,15 @@ class ModelName(Enum):
 
 
 @cache
-def get_llm(model_name: str) -> BaseChatModel:
+def get_llm(model_name: str, endpoint: str, api_key: SecretStr) -> BaseChatModel:
     """
-    Placeholder function to get the LLM instance.
-    In a real implementation, this would return an instance of the LLM based on the model name.
+    Returns a language model instance based on the specified model name.
+    Args:
+        model_name (str): The name of the model to retrieve.
+        endpoint (str): The API endpoint for the model.
+        api_key (SecretStr): The API key for authentication.
+    Returns:
+        BaseChatModel: An instance of the requested language model.
     """
 
     if model_name not in [m.value for m in ModelName]:
@@ -28,25 +31,21 @@ def get_llm(model_name: str) -> BaseChatModel:
     model = ModelName(model_name)
 
     match model:
-        case ModelName.GPT_4O:
-            pass
-        case ModelName.GPT_4O_MINI:
-            pass
-        case ModelName.QWEN_3_LOCAL:
+        case ModelName.GPT_4O: #TODO test openAi model
             llm = ChatOpenAI(
-                name=settings.model_name,
-                model="gpt-4o-mini",
-                api_key=SecretStr(settings.model_api_key),
-                base_url=settings.model_endpoint,
+                name=model_name,
+                model="gpt-4o",
+                api_key=api_key,
+                base_url=endpoint,
                 temperature=0.0,
                 max_tokens=512,
             )
-        case ModelName.GEMMA_3_LOCAL:
+        case ModelName.GPT_4O_MINI | ModelName.QWEN_3_LOCAL | ModelName.GEMMA_3_LOCAL:
             llm = ChatOpenAI(
-                name=settings.image_model_name,
+                name=model_name,
                 model="gpt-4o-mini",
-                api_key=SecretStr(settings.image_model_api_key),
-                base_url=settings.image_model_endpoint,
+                api_key=api_key,
+                base_url=endpoint,
                 temperature=0.0,
                 max_tokens=512,
             )

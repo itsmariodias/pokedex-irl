@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import spinner from './assets/spinner.gif';
+import spinner from './assets/spinner.svg';
 
 
 interface ScanPopupProps {

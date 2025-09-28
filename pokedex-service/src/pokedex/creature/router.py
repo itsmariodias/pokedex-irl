@@ -217,8 +217,8 @@ async def identify_creature(
 
     config = {
         "configurable": {
-            "llm": get_llm(settings.default_model),
-            "image_llm": get_llm("gemma-3-local"),
+            "llm": get_llm(settings.model_name, settings.model_endpoint, settings.model_api_key),
+            "image_llm": get_llm(settings.image_model_name, settings.image_model_endpoint, settings.image_model_api_key),
         }
     }
 

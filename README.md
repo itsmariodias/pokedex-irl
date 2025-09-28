@@ -1,18 +1,20 @@
 # PokeDex IRL
 
->PokeDex IRL is an open-source application that identifies real-world animals, insects, and sea life from images and generates creative, Pokédex-style entries using AI and LangChain agents. It features a modern web UI and a robust FastAPI backend.
+PokeDex IRL is an open-source application that identifies real-world animals, insects, and sea life from images and generates creative, Pokédex-style entries using AI and LangGraph agents. It features a modern React UI and a robust FastAPI backend.
 
+![PokeDex IRL Screenshot](screenshots/pokedex_irl.png)
 ---
 
 ## Features
 
 - **Image Upload & Validation**: Upload images of animals, insects, or sea life for instant identification.
 - **AI-Powered Identification**: Uses advanced LLMs and LangChain agents to identify creatures and generate detailed, Pokédex-style entries.
-- **REST API**: FastAPI-based backend with endpoints for image upload, creature CRUD, and identification.
+- **REST API**: FastAPI-based backend with endpoints for image upload, creature CRUD, search and identification.
 - **Database Storage**: Stores creature data in SQLite using SQLModel/SQLAlchemy.
 - **Modern Web UI**: Vite/React TypeScript frontend for a seamless Pokédex experience.
 - **Extensible Agents**: Modular agent architecture for scanning and explanation, powered by LangGraph and LangChain.
 
+![PokeDex IRL Screenshot](screenshots/pokedex_irl_kangaroo.png)
 ---
 
 ## Tech Stack
@@ -104,6 +106,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 - `POST /api/v1/creature/identify` — Upload an image to identify a creature and generate a Pokédex entry.
 - `GET /api/v1/creature/` — List all creatures in the database.
 - `GET /api/v1/creature/{id}` — Get details for a specific creature.
+- `GET /api/v1/creature/search` — Search creatures by name or description.
 
 See Swagger UI for full API details.
 
