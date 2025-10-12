@@ -1,5 +1,8 @@
 import searchIcon from './assets/search.png';
+import CustomDropdown from './CustomDropdown';
 import React, { useEffect, useState, useImperativeHandle, forwardRef, useRef } from 'react';
+import placeholderImg from './assets/placeholder.png';
+
 import spinner from './assets/spinner.svg';
 import NavBar from './NavBar';
 
@@ -296,6 +299,26 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
       });
   }, []);
 
+  // Body shape icon options and icon URL mapping
+  const bodyShapeOptions = [
+    { key: 'bipedal-tail', label: 'Bipedal w/ Tail' },
+    { key: 'bipedal', label: 'Bipedal' },
+    { key: 'fish', label: 'Fish' },
+    { key: 'head-base', label: 'Head-Base' },
+    { key: 'head-legs', label: 'Head-Legs' },
+    { key: 'head', label: 'Head' },
+    { key: 'insectoid', label: 'Insectoid' },
+    { key: 'quadruped', label: 'Quadruped' },
+    { key: 'serpentine', label: 'Serpentine' },
+    { key: 'tentacles', label: 'Tentacles' },
+    { key: 'winged', label: 'Winged' },
+  ];
+  const bodyShapeIconModules = import.meta.glob('./assets/body_shape_icons/*.png', { eager: true, import: 'default' }) as Record<string, string>;
+  const getBodyShapeIconUrl = (key: string) => {
+    const rel = `./assets/body_shape_icons/${key}.png`;
+    return bodyShapeIconModules[rel];
+  };
+
   // Memoize the left panel so it doesn't re-render on list-only updates
   const leftPane = React.useMemo(() => {
     return (
@@ -384,7 +407,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                     display: 'block',
                   }}
                   onError={e => {
-                    (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
+                    (e.target as HTMLImageElement).src = placeholderImg;
                   }}
                 />
               ) : (
@@ -416,10 +439,25 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
         >
           {scanMode ? (
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-              {scanAnalyzing && (
+              {scanAnalyzing && !error && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.85)', zIndex: 80, fontWeight: 800 }}>
                   <img src={spinner} alt="Analyzing" style={{ width: 72, height: 72, objectFit: 'contain' }} />
                   <div style={{ marginTop: 8, color: '#333', fontWeight: 800 }}>Analyzing...</div>
+                </div>
+              )}
+              {error && (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.95)', zIndex: 90, fontWeight: 800, color: '#b71c1c', fontSize: '1.1rem', padding: 16, textAlign: 'center', borderRadius: 18 }}>
+                  <div style={{ marginBottom: 8 }}>Error: {error}</div>
+                  <button
+                    onClick={() => {
+                      setError(null);
+                      setScanAnalyzing(false);
+                      setScanImageReady(false);
+                    }}
+                    style={{ background: 'var(--pokedex-red)', color: 'white', border: 'none', borderRadius: 8, padding: '0.5em 1.2em', fontWeight: 700, fontSize: '1em', cursor: 'pointer', marginTop: 8 }}
+                  >
+                    Dismiss
+                  </button>
                 </div>
               )}
               <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
@@ -740,9 +778,9 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
   // Analyze/identify the image via backend endpoint
   async function handleScanAnalyze() {
     if (!scanImageFile) return;
-    setScanAnalyzing(true);
-    setLoading(true);
-    setError(null);
+  setScanAnalyzing(true);
+  setLoading(true);
+  setError(null);
     try {
       const fd = new FormData();
       fd.append('image', scanImageFile);
@@ -780,9 +818,10 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
         console.warn('Failed to refetch creatures after identify', e);
       }
     } catch (err: any) {
-      setError(err.message || 'Unknown error');
+  setError(err.message || 'Failed to identify creature. Please try again.');
     } finally {
       setLoading(false);
+      setScanAnalyzing(false);
     }
   }
 
@@ -901,7 +940,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                   onClick={() => { setSelected(creature); setScanMode(false); }}
                 >
                   <img
-                    src={`http://localhost:8000/api/v1/static/uploads/${(creature.image_path ?? 'placeholder.png').replace(/^.*[\\\/]/, '')}`}
+                    src={`http://localhost:8000/api/v1/static/uploads/${(creature.image_path ?? "").replace(/^.*[\\\/]/, '')}`}
                     alt={creature.name}
                     style={{
                       width: 36,
@@ -913,7 +952,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                       display: 'inline-block',
                     }}
                     onError={e => {
-                      (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
+                      (e.target as HTMLImageElement).src = placeholderImg;
                     }}
                   />
                   <span style={{
@@ -1128,7 +1167,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                         position: 'relative',
                         paddingLeft: '1.2rem',
                         paddingRight: '1.2rem',
-                        outline: 'none', // Prevent blue highlight
+                        outline: 'none',
                         fontSize: '1.1rem',
                         fontWeight: 700,
                         color: 'var(--pokedex-bg)',
@@ -1138,12 +1177,18 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                       onBlur={e => e.target.style.outline = 'none'}
                       onChange={e => {
                         if (!gridFullLabel) return;
-                        // keep string until submit; enforce integer on submit
                         const v = e.target.value;
-                        // allow empty
                         setSearchParams(prev => ({ ...prev, [gridFullLabel]: v }));
                       }}
                     />
+                  ) : gridFullLabel === 'Body Shape' ? (
+                    <div style={{ width: '40%' }}>
+                      <CustomDropdown
+                        value={searchParams['Body Shape'] || ''}
+                        options={bodyShapeOptions.map(opt => ({ ...opt, iconUrl: getBodyShapeIconUrl(opt.key) }))}
+                        onChange={(val: string) => setSearchParams(prev => ({ ...prev, ['Body Shape']: val }))}
+                      />
+                    </div>
                   ) : (
                     <input
                       id="search-input"
@@ -1164,7 +1209,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                         position: 'relative',
                         paddingLeft: '1.2rem',
                         paddingRight: '1.2rem',
-                        outline: 'none', // Prevent blue highlight
+                        outline: 'none',
                         fontSize: '1.1rem',
                         fontWeight: 700,
                         color: 'var(--pokedex-bg)',
@@ -1173,7 +1218,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                       onFocus={e => e.target.style.outline = 'none'}
                       onBlur={e => e.target.style.outline = 'none'}
                       onChange={e => {
-                        if (!gridFullLabel) return; // require an active label to edit
+                        if (!gridFullLabel) return;
                         const v = e.target.value;
                         setSearchParams(prev => ({ ...prev, [gridFullLabel]: v }));
                       }}

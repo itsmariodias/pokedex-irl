@@ -24,9 +24,9 @@ class Settings(BaseSettings):
     upload_dir: str = "/uploads"
     model_name: str = "qwen-3-local"
     model_api_key: SecretStr
-    model_endpoint: str
+    model_endpoint: str | None = None
     image_model_name: str = "gemma-3-local"
-    image_model_endpoint: str
+    image_model_endpoint: str | None = None
     image_model_api_key: SecretStr
 
 

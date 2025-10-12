@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Creature } from './CreatureList';
+import placeholderImg from './assets/placeholder.png';
 
 interface CreatureCardProps {
   creature: Creature;
@@ -48,7 +49,7 @@ const CreatureCard: React.FC<CreatureCardProps> = ({ creature, onClose }) => (
       ✕
     </button>
     <img
-      src={`http://localhost:8000/api/v1/static/uploads/${creature.image_path.replace(/^.*[\\\/]/, '')}`}
+      src={`http://localhost:8000/api/v1/static/uploads/${(creature.image_path ?? '').replace(/^.*[\\\/]/, '')}`}
       alt={creature.name}
       style={{
         width: 180,
@@ -60,7 +61,7 @@ const CreatureCard: React.FC<CreatureCardProps> = ({ creature, onClose }) => (
         boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
       }}
       onError={e => {
-        (e.target as HTMLImageElement).src = 'http://localhost:8000/api/v1/static/uploads/placeholder.png';
+        (e.target as HTMLImageElement).src = placeholderImg;
       }}
     />
     <h2 style={{margin: '0 0 0.5rem 0', color: 'var(--pokedex-red)', fontWeight: 900, fontSize: '2rem'}}>{creature.name}</h2>
@@ -76,8 +77,8 @@ const CreatureCard: React.FC<CreatureCardProps> = ({ creature, onClose }) => (
           <td style={{display: 'flex', alignItems: 'center', gap: 10}}>
             {(() => {
               // Extract key after 'bsi:' or use as is
-              const match = /bsi:(.+)/.exec(creature.body_shape);
-              const key = match ? match[1] : creature.body_shape;
+              const match = /bsi:(.+)/.exec(creature.body_shape ?? '');
+              const key = match ? match[1] : (creature.body_shape ?? '');
               // Use Vite's import.meta.glob to import all icons
               const icons = import.meta.glob('./assets/body_shape_icons/*.png', { eager: true, import: 'default' });
               const iconPath = key ? `./assets/body_shape_icons/${key}.png` : null;
@@ -105,7 +106,7 @@ const CreatureCard: React.FC<CreatureCardProps> = ({ creature, onClose }) => (
               <div style={{width: 180, height: 18, borderRadius: 10, overflow: 'hidden', display: 'flex', boxShadow: '0 1px 4px #eee', border: '1px solid #e0e0e0'}} title={`♂️:♀️ = ${creature.gender_ratio}:1`}>
                 {(() => {
                   // gender_ratio: number of males per 1 female
-                  const ratio = Math.max(0, creature.gender_ratio) / 2;
+                  const ratio = Math.max(0, creature.gender_ratio ?? 0) / 2;
                   const total = 1;
                   const malePercent = (ratio / total) * 100;
                   const femalePercent = (1 - ratio / total) * 100;

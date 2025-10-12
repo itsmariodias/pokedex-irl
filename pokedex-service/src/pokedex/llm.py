@@ -7,6 +7,8 @@ from pydantic import SecretStr
 
 
 class ModelName(Enum):
+    GPT_5 = "gpt-5"
+    GPT_5_mini = "gpt-5-mini"
     GPT_4O = "gpt-4o"
     GPT_4O_MINI = "gpt-4o-mini"
     QWEN_3_LOCAL = "qwen-3-local"
@@ -31,23 +33,27 @@ def get_llm(model_name: str, endpoint: str, api_key: SecretStr) -> BaseChatModel
     model = ModelName(model_name)
 
     match model:
-        case ModelName.GPT_4O: #TODO test openAi model
-            llm = ChatOpenAI(
-                name=model_name,
-                model="gpt-4o",
-                api_key=api_key,
-                base_url=endpoint,
-                temperature=0.0,
-                max_tokens=512,
-            )
-        case ModelName.GPT_4O_MINI | ModelName.QWEN_3_LOCAL | ModelName.GEMMA_3_LOCAL:
+        case ModelName.QWEN_3_LOCAL | ModelName.GEMMA_3_LOCAL:
             llm = ChatOpenAI(
                 name=model_name,
                 model="gpt-4o-mini",
                 api_key=api_key,
                 base_url=endpoint,
                 temperature=0.0,
-                max_tokens=512,
+                max_tokens=5000,
+            )
+        case ModelName.GPT_5 | ModelName.GPT_5_mini:
+            llm = ChatOpenAI(
+                model=model_name,
+                api_key=api_key,
+                max_tokens=5000,
+            )
+        case _:
+            llm = ChatOpenAI(
+                model=model_name,
+                api_key=api_key,
+                temperature=0.0,
+                max_tokens=5000,
             )
 
     return llm
