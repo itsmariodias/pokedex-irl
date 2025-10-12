@@ -43,7 +43,20 @@ source venv/bin/activate  # macOS / Linux
 2. Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+# Make sure pip and the build tools are up-to-date
+python -m pip install --upgrade pip setuptools wheel
+
+# Install the package and its dependencies from the local project
+pip install .
+
+# (Optional during development) editable install so changes are picked up
+# without reinstalling:
+pip install -e .
+
+# (Optional) install the test dependencies declared under
+# [project.optional-dependencies]. This installs the package plus the
+# `test` extra so you can run the test suite locally:
+pip install -e .[test]
 ```
 
 3. Create required static directories:

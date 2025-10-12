@@ -1,0 +1,18 @@
+services:
+  pokedex:
+    build: .
+    image: pokedex-irl:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:////app/pokedex.db
+      - MODEL_API_KEY=${MODEL_API_KEY}
+      - MODEL_NAME=${MODEL_NAME}
+      - IMAGE_MODEL_API_KEY=${IMAGE_MODEL_API_KEY}
+      - IMAGE_MODEL_NAME=${IMAGE_MODEL_NAME}
+    volumes:
+      # Persist the SQLite DB and uploads directory locally
+      - ./pokedex-service/pokedex.db:/app/pokedex.db
+      - ./static:/static
+      - ./static/uploads:/uploads
+    restart: unless-stopped

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from langgraph.graph.graph import CompiledGraph
+from langgraph.graph.state import CompiledStateGraph
 
 from pokedex.agent.scanner.agent import scanner_agent
 from pokedex.agent.explainer.agent import explainer_agent
@@ -9,7 +9,7 @@ from pokedex.agent.explainer.agent import explainer_agent
 @dataclass
 class Agent:
     description: str
-    graph: CompiledGraph
+    graph: CompiledStateGraph
 
 
 agents: dict[str, Agent] = {
@@ -24,5 +24,5 @@ agents: dict[str, Agent] = {
 }
 
 
-def get_agent(agent_name: str) -> CompiledGraph:
+def get_agent(agent_name: str) -> CompiledStateGraph:
     return agents[agent_name].graph
