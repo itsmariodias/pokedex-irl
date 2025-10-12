@@ -3,10 +3,9 @@
 PokeDex IRL is an open-source application that identifies real-world animals, insects, and sea life from images and generates creative, Pokédex-style entries using AI and LangGraph agents. It features a modern React UI and a robust FastAPI backend.
 
 ![PokeDex IRL Screenshot](screenshots/pokedex_irl.png)
----
 
-## Features
-
+Features
+--------
 - **Image Upload & Validation**: Upload images of animals, insects, or sea life for instant identification.
 - **AI-Powered Identification**: Uses advanced LLMs and LangChain agents to identify creatures and generate detailed, Pokédex-style entries.
 - **REST API**: FastAPI-based backend with endpoints for image upload, creature CRUD, search and identification.
@@ -15,19 +14,16 @@ PokeDex IRL is an open-source application that identifies real-world animals, in
 - **Extensible Agents**: Modular agent architecture for scanning and explanation, powered by LangGraph and LangChain.
 
 ![PokeDex IRL Screenshot](screenshots/pokedex_irl_detail.png)
----
 
-## Tech Stack
-
+Tech Stack
+--------
 - **Backend**: Python 3.12+, FastAPI, SQLModel, SQLAlchemy, Pydantic, Uvicorn, Loguru, LangChain, LangGraph
 - **Frontend**: React 19+, TypeScript, Vite
 - **Database**: SQLite
 - **AI/LLM**: OpenAI-compatible LLMs (configurable)
 
----
-
-## Project Structure
-
+Project Structure
+--------
 ```
 pokedex-irl/
 ├── pokedex-service/         # FastAPI backend, AI/LLM logic, database, API
@@ -49,10 +45,8 @@ pokedex-irl/
 └── LICENSE                  # Apache 2.0 License
 ```
 
----
-
-## Getting Started
-
+Getting Started
+--------
 ### Prerequisites
 - Python 3.12+
 - Node.js 18+
@@ -92,17 +86,14 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
----
-
-## Usage
+Usage
+--------
 1. Start the backend and frontend servers as above.
 2. Open the frontend in your browser (default: http://localhost:5173).
 3. Upload an image to receive a Pokédex-style entry and detailed explanation.
 
----
-
-## API Overview
-
+API Overview
+--------
 - `POST /api/v1/creature/identify` — Upload an image to identify a creature and generate a Pokédex entry.
 - `GET /api/v1/creature/` — List all creatures in the database.
 - `GET /api/v1/creature/{id}` — Get details for a specific creature.
@@ -110,23 +101,17 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 See Swagger UI for full API details.
 
----
-
-## Configuration
-
+Configuration
+--------
 Environment variables can be set in a `.env` file in `pokedex-service/` (see `src/pokedex/config.py` for all options):
 
 - `MODEL_NAME`, `MODEL_API_KEY`, `MODEL_ENDPOINT` — LLM configuration
 - `IMAGE_MODEL_NAME`, `IMAGE_MODEL_ENDPOINT`, `IMAGE_MODEL_API_KEY` — Image model config
 
----
-
-## Contributing
-
+Contributing
+--------
 Contributions are welcome! Please open issues or pull requests for bug fixes, features, or improvements.
 
----
-
-## License
-
+License
+--------
 Apache License 2.0 — See [LICENSE](LICENSE) for details.
