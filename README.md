@@ -14,7 +14,7 @@ PokeDex IRL is an open-source application that identifies real-world animals, in
 - **Modern Web UI**: Vite/React TypeScript frontend for a seamless Pokédex experience.
 - **Extensible Agents**: Modular agent architecture for scanning and explanation, powered by LangGraph and LangChain.
 
-![PokeDex IRL Screenshot](screenshots/pokedex_irl_kangaroo.png)
+![PokeDex IRL Screenshot](screenshots/pokedex_irl_detail.png)
 ---
 
 ## Tech Stack
