@@ -21,11 +21,15 @@ Tech Stack
 - **Frontend**: React 19+, TypeScript, Vite
 - **Database**: SQLite
 - **AI/LLM**: OpenAI-compatible LLMs (configurable)
+- **Containerization**: Docker, Docker Compose
 
 Project Structure
 --------
 ```
 pokedex-irl/
+├── docker/                  # Docker-related files
+│   ├── nginx.conf           # Nginx config for reverse proxy
+│   └── start.sh             # Entrypoint script for Docker container
 ├── pokedex-service/         # FastAPI backend, AI/LLM logic, database, API
 │   ├── src/pokedex/
 │   │   ├── agent/           # LangChain/LangGraph agents (scanner, explainer)
@@ -40,6 +44,10 @@ pokedex-irl/
 │   ├── src/
 │   │   ├── App.tsx, CreatureList.tsx, CreatureCard.tsx, NavBar.tsx, ScanPopup.tsx, ...
 │   └── package.json, vite.config.ts, tsconfig.json, ...
+├── screenshots/             # Project screenshots
+├── docker-compose.yml       # Docker Compose setup for backend + frontend
+├── Dockerfile               # Multi-stage Dockerfile for building and running the app
+├── .env.example             # Example environment variables
 ├── static/uploads/          # Uploaded images
 ├── README.md                # This file
 └── LICENSE                  # Apache 2.0 License
@@ -85,6 +93,20 @@ npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### Docker Setup
+
+Pokedex IRL can be run in a single Docker container using Docker Compose.
+
+Ensure Docker and Docker Compose are installed. Modify the `docker-compose.yml` with your environment variables as needed (or create a `.env` file).
+Then run:
+
+```bash
+docker-compose up --build -d
+```
+
+This will start both the backend (FastAPI) and frontend (Vite/React) services in a single container.
+The application will be accessible at [http://localhost:8080](http://localhost:8080).
 
 Usage
 --------
