@@ -149,7 +149,9 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
     try {
       const formData = new FormData();
       formData.append('image', imageFile);
-      const res = await fetch('http://localhost:8000/api/v1/creature/identify', {
+      const res = await fetch((import.meta.env.VITE_IN_CONTAINER === 'true'
+        ? `${window.location.origin}/api`
+        : 'http://localhost:8000/api') + '/creature/identify', {
         method: 'POST',
         body: formData,
       });
@@ -195,7 +197,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
         left: 0,
         width: '100vw',
         height: '100vh',
-          background: 'rgba(0,0,0,0.45)',
+        background: 'rgba(0,0,0,0.45)',
         zIndex: 2000,
         display: 'flex',
         alignItems: 'center',
@@ -205,16 +207,16 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
     >
       <div
         style={{
-            background: 'var(--pokedex-bg)',
-            borderRadius: 24,
-            padding: '2.5rem 2.5rem 2rem 2.5rem',
-            minWidth: 420,
-            maxWidth: 540,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+          background: 'var(--pokedex-bg)',
+          borderRadius: 24,
+          padding: '2.5rem 2.5rem 2rem 2.5rem',
+          minWidth: 420,
+          maxWidth: 540,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -273,7 +275,7 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                     <span>
                       <img src={spinner} alt="Loading" style={{ width: 28, height: 28, verticalAlign: 'middle' }} />
                     </span>
-                      <span style={{ fontWeight: 700, color: 'var(--pokedex-red)', fontSize: '1.2rem' }}>Analyzing...</span>
+                    <span style={{ fontWeight: 700, color: 'var(--pokedex-red)', fontSize: '1.2rem' }}>Analyzing...</span>
                   </>
                 )}
               </div>
@@ -318,8 +320,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                 <button
                   className="scan-btn-anim"
                   style={{
-                      background: 'var(--pokedex-red)',
-                      color: '#fff',
+                    background: 'var(--pokedex-red)',
+                    color: '#fff',
                     border: 'none',
                     borderRadius: 20,
                     padding: '0.5rem 1.5rem',
@@ -341,8 +343,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                 htmlFor="scan-upload-input"
                 className="scan-btn-anim"
                 style={{
-                    background: 'var(--pokedex-red)',
-                    color: 'var(--pokedex-bg)',
+                  background: 'var(--pokedex-red)',
+                  color: 'var(--pokedex-bg)',
                   border: 'none',
                   borderRadius: 20,
                   padding: '0.5rem 1.5rem',
@@ -369,8 +371,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                 <button
                   className="scan-btn-anim"
                   style={{
-                      background: 'var(--pokedex-red)',
-                      color: 'var(--pokedex-bg)',
+                    background: 'var(--pokedex-red)',
+                    color: 'var(--pokedex-bg)',
                     border: 'none',
                     borderRadius: 20,
                     padding: '0.5rem 1.5rem',
@@ -415,8 +417,8 @@ const ScanPopup: React.FC<ScanPopupProps> = ({ open, onClose, onScanResult, onSc
                   <button
                     className="scan-btn-anim"
                     style={{
-                        background: 'var(--pokedex-green)',
-                        color: '#fff',
+                      background: 'var(--pokedex-green)',
+                      color: '#fff',
                       border: 'none',
                       borderRadius: 20,
                       padding: '0.5rem 1.5rem',

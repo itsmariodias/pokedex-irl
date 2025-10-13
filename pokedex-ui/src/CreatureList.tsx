@@ -27,7 +27,9 @@ export interface Creature {
 }
 
 // Backend API base for creature endpoints
-const API_URL = 'http://localhost:8000/api/v1/creature/';
+const API_URL = (import.meta.env.VITE_IN_CONTAINER === 'true'
+  ? `${window.location.origin}/api`
+  : 'http://localhost:8000/api') + '/creature/';
 
 // Small typewriter hook used for animated text; keeps it simple and fast
 function useTypewriter(text: string, speed = 20) {
@@ -151,12 +153,12 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
   const activeIsRange = !!gridFullLabel && rangeFields.includes(gridFullLabel);
   const activeFieldValue = activeIsRange
     ? (() => {
-        const r = gridFullLabel ? searchRangeParams[gridFullLabel] : undefined;
-        if (!r) return '';
-        const min = r.min ?? '';
-        const max = r.max ?? '';
-        return `${min}-${max}`;
-      })()
+      const r = gridFullLabel ? searchRangeParams[gridFullLabel] : undefined;
+      if (!r) return '';
+      const min = r.min ?? '';
+      const max = r.max ?? '';
+      return `${min}-${max}`;
+    })()
     : (gridFullLabel ? (searchParams[gridFullLabel] ?? '') : '');
   // (we derive min/max from activeFieldValue on demand)
 
@@ -393,26 +395,28 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                 <canvas ref={scanCanvasRef} width={240} height={240} style={{ display: 'none' }} />
               </div>
             ) : ((selected || hovered) ? (
-                <img
-                  key={selected ? selected.id : hovered?.id}
-                  src={`http://localhost:8000/api/v1/static/uploads/${((selected || hovered)?.image_path ?? '').replace(/^.*[\\\/]/, '')}`}
-                  alt={(selected || hovered)?.name ?? ''}
-                  className="crt-wipe"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: '0',
-                    background: 'transparent',
-                    display: 'block',
-                  }}
-                  onError={e => {
-                    (e.target as HTMLImageElement).src = placeholderImg;
-                  }}
-                />
-              ) : (
-                <div style={{ color: 'rgb(51, 51, 51)', fontSize: '1.2rem' }}></div>
-              ))}
+              <img
+                key={selected ? selected.id : hovered?.id}
+                src={`${(import.meta.env.VITE_IN_CONTAINER === 'true'
+                  ? `${window.location.origin}/api`
+                  : 'http://localhost:8000/api')}/static/uploads/${((selected || hovered)?.image_path ?? '').replace(/^.*[\\\/]/, '')}`}
+                alt={(selected || hovered)?.name ?? ''}
+                className="crt-wipe"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '0',
+                  background: 'transparent',
+                  display: 'block',
+                }}
+                onError={e => {
+                  (e.target as HTMLImageElement).src = placeholderImg;
+                }}
+              />
+            ) : (
+              <div style={{ color: 'rgb(51, 51, 51)', fontSize: '1.2rem' }}></div>
+            ))}
           </div>
         </div>
         <div
@@ -675,8 +679,8 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
           setLoading(false);
         });
     },
-  showCreature: (_creature: Creature) => { /* no-op: popup/modal not implemented */ },
-  showScan: (open: boolean) => { setScanMode(open); },
+    showCreature: (_creature: Creature) => { /* no-op: popup/modal not implemented */ },
+    showScan: (open: boolean) => { setScanMode(open); },
   }));
 
   // Whenever scanMode is deactivated, reset all scan UI state so buttons return to initial state
@@ -778,13 +782,15 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
   // Analyze/identify the image via backend endpoint
   async function handleScanAnalyze() {
     if (!scanImageFile) return;
-  setScanAnalyzing(true);
-  setLoading(true);
-  setError(null);
+    setScanAnalyzing(true);
+    setLoading(true);
+    setError(null);
     try {
       const fd = new FormData();
       fd.append('image', scanImageFile);
-      const res = await fetch('http://localhost:8000/api/v1/creature/identify', {
+      const res = await fetch((import.meta.env.VITE_IN_CONTAINER === 'true'
+        ? `${window.location.origin}/api`
+        : 'http://localhost:8000/api') + '/creature/identify', {
         method: 'POST',
         body: fd,
       });
@@ -818,7 +824,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
         console.warn('Failed to refetch creatures after identify', e);
       }
     } catch (err: any) {
-  setError(err.message || 'Failed to identify creature. Please try again.');
+      setError(err.message || 'Failed to identify creature. Please try again.');
     } finally {
       setLoading(false);
       setScanAnalyzing(false);
@@ -864,7 +870,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
 
   return (
     <div style={pokedexStyles}>
-  <NavBar isAnalyzing={scanAnalyzing} hasDetails={!!selected} />
+      <NavBar isAnalyzing={scanAnalyzing} hasDetails={!!selected} />
       <div style={{
         display: 'flex',
         flex: 1,
@@ -940,7 +946,9 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                   onClick={() => { setSelected(creature); setScanMode(false); }}
                 >
                   <img
-                    src={`http://localhost:8000/api/v1/static/uploads/${(creature.image_path ?? "").replace(/^.*[\\\/]/, '')}`}
+                    src={`${(import.meta.env.VITE_IN_CONTAINER === 'true'
+                      ? `${window.location.origin}/api`
+                      : 'http://localhost:8000/api')}/static/uploads/${(creature.image_path ?? "").replace(/^.*[\\\/]/, '')}`}
                     alt={creature.name}
                     style={{
                       width: 36,
@@ -1028,16 +1036,16 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                     }}
                   >
                     <div className={`pokedex-grid-btn-inner${pressed ? '-pressed' : ''}`} style={{ width: '100%', height: '100%', display: 'flex', fontFamily: 'inherit', fontWeight: 600, fontSize: '1em', textAlign: 'left' }}>
-                        <span
-                          style={{
-                            paddingLeft: '0.5rem',
-                            paddingTop: '0.5rem',
-                            position: 'relative',
-                          }}
-                          className={`pokedex-grid-label${pressed ? '-pressed' : ''}`}
-                        >
-                          {short}
-                        </span>
+                      <span
+                        style={{
+                          paddingLeft: '0.5rem',
+                          paddingTop: '0.5rem',
+                          position: 'relative',
+                        }}
+                        className={`pokedex-grid-label${pressed ? '-pressed' : ''}`}
+                      >
+                        {short}
+                      </span>
                     </div>
                   </button>
                 );
@@ -1045,7 +1053,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
             )}
           </div>
           {/* Search buttons and text box */}
-            <div style={{
+          <div style={{
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -1056,41 +1064,41 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
             marginLeft: 'auto',
             marginRight: 'auto',
             width: '70%',
-            }}>
-            <div 
-              style={{ 
-              position: 'relative', 
-              flex: 1, 
-              width: '100%',
-              display: 'flex', 
-              alignItems: 'center', 
-              height: 'auto', 
-              gap: '5%',
-              justifyContent: 'flex-start',
+          }}>
+            <div
+              style={{
+                position: 'relative',
+                flex: 1,
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                height: 'auto',
+                gap: '5%',
+                justifyContent: 'flex-start',
               }}>
               <label
-              htmlFor="search-input"
-              style={{
-                background: 'var(--pokedex-bg)',
-                border: '3px solid var(--pokedex-bg)',
-                borderRadius: '18px',
-                height: '3.5rem',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center', 
-                alignItems: 'flex-start',
-                overflow: 'hidden',
-                position: 'relative',
-                paddingLeft: '1.2rem',
-                paddingRight: '1.2rem',
-                fontSize: '1.1rem',
-                fontWeight: 700,
-                color: 'var(--pokedex-black)',
-                width: '30%',
-              }}
+                htmlFor="search-input"
+                style={{
+                  background: 'var(--pokedex-bg)',
+                  border: '3px solid var(--pokedex-bg)',
+                  borderRadius: '18px',
+                  height: '3.5rem',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  paddingLeft: '1.2rem',
+                  paddingRight: '1.2rem',
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  color: 'var(--pokedex-black)',
+                  width: '30%',
+                }}
               >
-              {gridFullLabel || 'Field Name'}
+                {gridFullLabel || 'Field Name'}
               </label>
               {activeIsRange ? (
                 <div style={{ display: 'flex', gap: '0.6rem', width: '60%', alignItems: 'center' }}>
@@ -1143,7 +1151,7 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
                     }}
                   />
                 </div>
-                ) : (
+              ) : (
                 <>
                   {gridFullLabel === 'ID' ? (
                     <input
@@ -1248,14 +1256,14 @@ const CreatureList = forwardRef<CreatureListHandle, CreatureListProps>(({ onScan
               onClick={() => { handleSearch(); }}
               title="Search"
             >
-                <img
-                  src={searchIcon}
-                  alt="Search"
+              <img
+                src={searchIcon}
+                alt="Search"
                   style={{ width: 28, height: 28, objectFit: 'contain'}}
-                  onError={e => { (e.target as HTMLImageElement).src = searchIcon; }}
-                />
+                onError={e => { (e.target as HTMLImageElement).src = searchIcon; }}
+              />
             </button>
-            </div>
+          </div>
         </div>
       </div>
     </div>

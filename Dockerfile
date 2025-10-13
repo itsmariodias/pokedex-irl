@@ -4,6 +4,12 @@
 FROM node:18-alpine AS ui-builder
 WORKDIR /app/ui
 COPY pokedex-ui/ ./
+
+# Indicate to the frontend that it's running in a containerized environment
+# so it can set the correct API base URL for backend requests
+ARG VITE_IN_CONTAINER=true
+ENV VITE_IN_CONTAINER=$VITE_IN_CONTAINER
+
 # Prefer lockfile install; fallback to npm install
 RUN npm ci --silent || npm install --silent
 RUN npm run build

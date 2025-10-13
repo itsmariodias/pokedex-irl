@@ -3,7 +3,7 @@ services:
     build: .
     image: pokedex-irl:latest
     ports:
-      - "8000:80"
+      - "8080:80"
     environment:
       - DATABASE_URL=sqlite:////app/pokedex.db
       - MODEL_API_KEY=${MODEL_API_KEY}

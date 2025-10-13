@@ -49,7 +49,9 @@ const CreatureCard: React.FC<CreatureCardProps> = ({ creature, onClose }) => (
       ✕
     </button>
     <img
-      src={`http://localhost:8000/api/v1/static/uploads/${(creature.image_path ?? '').replace(/^.*[\\\/]/, '')}`}
+      src={`${(import.meta.env.VITE_IN_CONTAINER === 'true'
+        ? `${window.location.origin}/api`
+        : 'http://localhost:8000/api')}/static/uploads/${(creature.image_path ?? '').replace(/^.*[\\\/]/, '')}`}
       alt={creature.name}
       style={{
         width: 180,
