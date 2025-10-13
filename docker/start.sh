@@ -2,7 +2,7 @@
 set -e
 
 # Start uvicorn in the background
-uvicorn pokedex.main:app --host 0.0.0.0 --port 8000 &
+uvicorn pokedex.main:app --host 127.0.0.1 --port 8000 &
 UVICORN_PID=$!
 
 # Start nginx in foreground

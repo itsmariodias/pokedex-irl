@@ -45,6 +45,10 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/*.whl
 # Put the built frontend into nginx HTML dir
 COPY --from=ui-builder /app/ui/dist /usr/share/nginx/html
 
+# Remove default nginx config
+RUN rm -f /etc/nginx/conf.d/default.conf \
+       /etc/nginx/sites-enabled/default
+
 # Nginx config and start script (startup script should launch nginx and the Python app)
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/start.sh /start.sh

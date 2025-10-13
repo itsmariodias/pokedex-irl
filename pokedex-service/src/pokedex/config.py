@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_nested_delimiter="__")
 
     # API Configuration
-    api_v1_prefix: str = "/api/v1"
+    api_prefix: str = "/api"
     project_name: str = "Pokedex Service"
     project_description: str = "Pokedex Service API"
     port: int = 8000
